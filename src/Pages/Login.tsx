@@ -1,92 +1,149 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react'
-import { loginUser } from '@/api'
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
+import { loginUser } from "../Utils/api";
+import { useAuthStore } from "../stores/auth";
+
+interface LoginErrors {
+  username?: string;
+  password?: string;
+  submit?: string;
+}
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState({})
-  const [success, setSuccess] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const navigate = useNavigate()
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<LoginErrors>({});
+  const [success, setSuccess] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuthStore();
 
-  const validateForm = () => {
-    const newErrors = {}
-    
-    if (!email) {
-      newErrors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Please enter a valid email'
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
     }
-    
+  }, [isAuthenticated, navigate]);
+
+  const validateForm = (): LoginErrors => {
+    const newErrors: LoginErrors = {};
+
+    if (!username) {
+      newErrors.username = "Username is required";
+    } else if (username.length < 3) {
+      newErrors.username = "Username must be at least 3 characters";
+    }
+
     if (!password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = "Password is required";
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+      newErrors.password = "Password must be at least 6 characters";
     }
-    
-    return newErrors
-  }
+
+    return newErrors;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Validate
-    const newErrors = validateForm()
-    setErrors(newErrors)
-    
+    const newErrors = validateForm();
+    setErrors(newErrors);
+
     if (Object.keys(newErrors).length > 0) {
-      return
+      return;
     }
-    
-    setIsLoading(true)
+
+    setIsLoading(true);
     try {
-      const response = await loginUser(email, password)
-      
+      const response = await loginUser(username, password);
+
       // Store remember me preference
       if (rememberMe) {
-        localStorage.setItem('rememberEmail', email)
+        localStorage.setItem("rememberUsername", username);
       } else {
-        localStorage.removeItem('rememberEmail')
+        localStorage.removeItem("rememberUsername");
       }
-      
-      setSuccess(true)
-      console.log('Login successful:', response)
-      
+
+      // Update auth store with user data and token
+      const userData = {
+        id: response.user?.id || response.id || "1",
+        username: response.user?.username || username,
+        name: response.user?.name || response.name,
+        full_name: response.user?.full_name || response.full_name,
+        role: response.user?.role || response.role,
+      };
+
+      const token =
+        response.token ||
+        response.access_token ||
+        response.authToken ||
+        response.access ||
+        response.jwt;
+
+      // console.log('=== LOGIN DEBUG ===')
+      // console.log('Full API Response:', JSON.stringify(response, null, 2))
+      // console.log('Available keys:', Object.keys(response))
+      // console.log('Extracted token:', token)
+      // console.log('Token type:', typeof token)
+      // console.log('=== END DEBUG ===')
+
+      if (!token || token === "undefined" || token === null) {
+        console.error("No valid token found in response");
+        setErrors({
+          submit:
+            "No authentication token received from server. Please check your credentials.",
+        });
+        return;
+      }
+
+      // Save to auth store
+      login(token, userData);
+
+      // console.log('User data saved:', userData)
+      // console.log('Token saved to localStorage:', localStorage.getItem('authToken'))
+      // console.log('Auth store token:', token)
+
+      setSuccess(true);
+      // console.log('Login successful:', response)
+
       // Redirect to dashboard after 1.5 seconds
       setTimeout(() => {
-        navigate('/dashboard')
-      }, 1500)
+        navigate("/dashboard");
+      }, 1500);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Login failed. Please try again.'
-      setErrors({ submit: errorMessage })
-      console.error('Login error:', error)
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Login failed. Please try again.";
+      setErrors({ submit: errorMessage });
+      console.error("Login error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const handleInputChange = (field: string, value: string) => {
-    if (field === 'email') setEmail(value)
-    if (field === 'password') setPassword(value)
-    
+  const handleInputChange = (field: keyof LoginErrors, value: string) => {
+    if (field === "username") setUsername(value);
+    if (field === "password") setPassword(value);
+
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }))
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-  }
+  };
 
-  // Load remembered email on component mount
+  // Load remembered username on component mount
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem('rememberEmail')
-    if (rememberedEmail) {
-      setEmail(rememberedEmail)
-      setRememberMe(true)
+    const rememberedUsername = localStorage.getItem("rememberUsername");
+    if (rememberedUsername) {
+      setUsername(rememberedUsername);
+      setRememberMe(true);
     }
-  }, [])
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-blue-50 p-4">
@@ -103,7 +160,9 @@ const Login = () => {
           {success && (
             <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3">
               <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span className="text-emerald-700 font-medium">Login successful! Redirecting...</span>
+              <span className="text-emerald-700 font-medium">
+                Login successful! Redirecting...
+              </span>
             </div>
           )}
 
@@ -115,29 +174,31 @@ const Login = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+            {/* Username */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+                Username
               </label>
               <div className="relative">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="you@example.com"
+                  type="text"
+                  value={username}
+                  onChange={(e) =>
+                    handleInputChange("username", e.target.value)
+                  }
+                  placeholder="Enter your username"
                   disabled={isLoading}
                   className={`w-full px-4 py-3 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                    errors.email
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-gray-300 bg-gray-50 focus:border-emerald-500'
-                  } ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    errors.username
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300 bg-gray-50 focus:border-emerald-500"
+                  } ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                 />
               </div>
-              {errors.email && (
+              {errors.username && (
                 <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
                   <AlertCircle className="w-4 h-4" />
-                  {errors.email}
+                  {errors.username}
                 </p>
               )}
             </div>
@@ -149,16 +210,18 @@ const Login = () => {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   placeholder="••••••••"
                   disabled={isLoading}
                   className={`w-full px-4 py-3 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                     errors.password
-                      ? 'border-red-300 bg-red-50'
-                      : 'border-gray-300 bg-gray-50 focus:border-emerald-500'
-                  } ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300 bg-gray-50 focus:border-emerald-500"
+                  } ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
                 />
                 <button
                   type="button"
@@ -191,7 +254,10 @@ const Login = () => {
                 disabled={isLoading}
                 className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer disabled:opacity-60"
               />
-              <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-600 cursor-pointer">
+              <label
+                htmlFor="rememberMe"
+                className="ml-2 text-sm text-gray-600 cursor-pointer"
+              >
                 Remember me
               </label>
             </div>
@@ -202,8 +268,8 @@ const Login = () => {
               disabled={isLoading}
               className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
                 isLoading
-                  ? 'bg-emerald-400 text-white cursor-not-allowed'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  ? "bg-emerald-400 text-white cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
               }`}
             >
               {isLoading ? (
@@ -212,21 +278,24 @@ const Login = () => {
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </button>
           </form>
 
           {/* Footer Links */}
           <div className="mt-6 text-center">
-            <a href="#" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
+            <a
+              href="#"
+              className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
+            >
               Forgot password?
             </a>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
