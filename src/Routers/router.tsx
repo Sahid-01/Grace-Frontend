@@ -2,6 +2,7 @@ import Layout from "@/layouts/Layout";
 import Login from "@/Pages/Login";
 import Dashboard from "@/Pages/Dashboard";
 import Users from "@/Pages/Users";
+import Class from "@/Pages/Classes";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import type { ReactElement } from "react";
 import { useAuthStore } from "@/stores/auth";
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "users",
         element: <ProtectedRoute element={<Users />} />,
+      },
+      {
+        path: "classes",
+        element: <ProtectedRoute element={<Class />} />,
       },
     ],
   },

@@ -27,12 +27,20 @@ interface StudentProfileState {
   loading: boolean;
   error: string | null;
   currentProfile: StudentProfileData | null;
-  
+
   fetchStudentProfiles: () => Promise<void>;
   getStudentProfile: (id: number | string) => Promise<void>;
-  createStudentProfile: (profileData: Partial<StudentProfileData>) => Promise<void>;
-  updateStudentProfile: (id: number | string, profileData: Partial<StudentProfileData>) => Promise<void>;
-  patchStudentProfile: (id: number | string, profileData: Partial<StudentProfileData>) => Promise<void>;
+  createStudentProfile: (
+    profileData: Partial<StudentProfileData>,
+  ) => Promise<void>;
+  updateStudentProfile: (
+    id: number | string,
+    profileData: Partial<StudentProfileData>,
+  ) => Promise<void>;
+  patchStudentProfile: (
+    id: number | string,
+    profileData: Partial<StudentProfileData>,
+  ) => Promise<void>;
   deleteStudentProfile: (id: number | string) => Promise<void>;
   getStudentsByGrade: (grade?: string) => Promise<void>;
   clearError: () => void;
@@ -46,7 +54,7 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
 
   fetchStudentProfiles: async () => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(StudentProfileApi.fetchStudentProfiles, {
@@ -54,10 +62,13 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const profilesData = res.data.data || res.data.results || res.data;
-      
-      set({ profiles: Array.isArray(profilesData) ? profilesData : [], loading: false });
+
+      set({
+        profiles: Array.isArray(profilesData) ? profilesData : [],
+        loading: false,
+      });
     } catch (err: any) {
       console.error("Fetch Student Profiles Error:", err.response?.data);
       set({
@@ -70,7 +81,7 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
 
   getStudentProfile: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(StudentProfileApi.getStudentProfile(id), {
@@ -78,11 +89,10 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const profileData = res.data.data || res.data;
       set({ currentProfile: profileData, loading: false });
     } catch (err: any) {
-      console.log("Student profile not found:", err.response?.status);
       set({
         error: err.response?.data?.detail || "Failed to fetch student profile",
         loading: false,
@@ -93,47 +103,64 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
 
   createStudentProfile: async (profileData: Partial<StudentProfileData>) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(StudentProfileApi.createStudentProfile, profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.post(
+        StudentProfileApi.createStudentProfile,
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       const newProfile = res.data.data || res.data;
-      
+
       set((state) => ({
         profiles: [...state.profiles, newProfile],
         loading: false,
       }));
     } catch (err: any) {
       set({
-        error: err.response?.data?.detail || err.response?.data?.message || "Failed to create student profile",
+        error:
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Failed to create student profile",
         loading: false,
       });
     }
   },
 
-  updateStudentProfile: async (id: number | string, profileData: Partial<StudentProfileData>) => {
+  updateStudentProfile: async (
+    id: number | string,
+    profileData: Partial<StudentProfileData>,
+  ) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.put(StudentProfileApi.updateStudentProfile(id), profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.put(
+        StudentProfileApi.updateStudentProfile(id),
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       const updatedProfile = res.data.data || res.data;
-      
+
       set((state) => ({
-        profiles: state.profiles.map((profile) => 
-          profile.id === id ? updatedProfile : profile
+        profiles: state.profiles.map((profile) =>
+          profile.id === id ? updatedProfile : profile,
         ),
-        currentProfile: state.currentProfile?.id === id ? updatedProfile : state.currentProfile,
+        currentProfile:
+          state.currentProfile?.id === id
+            ? updatedProfile
+            : state.currentProfile,
         loading: false,
       }));
     } catch (err: any) {
@@ -144,24 +171,34 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
     }
   },
 
-  patchStudentProfile: async (id: number | string, profileData: Partial<StudentProfileData>) => {
+  patchStudentProfile: async (
+    id: number | string,
+    profileData: Partial<StudentProfileData>,
+  ) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.patch(StudentProfileApi.patchStudentProfile(id), profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.patch(
+        StudentProfileApi.patchStudentProfile(id),
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       const updatedProfile = res.data.data || res.data;
-      
+
       set((state) => ({
-        profiles: state.profiles.map((profile) => 
-          profile.id === id ? updatedProfile : profile
+        profiles: state.profiles.map((profile) =>
+          profile.id === id ? updatedProfile : profile,
         ),
-        currentProfile: state.currentProfile?.id === id ? updatedProfile : state.currentProfile,
+        currentProfile:
+          state.currentProfile?.id === id
+            ? updatedProfile
+            : state.currentProfile,
         loading: false,
       }));
     } catch (err: any) {
@@ -174,7 +211,7 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
 
   deleteStudentProfile: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       await axios.delete(StudentProfileApi.deleteStudentProfile(id), {
@@ -182,15 +219,19 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       set((state) => ({
         profiles: state.profiles.filter((profile) => profile.id !== id),
-        currentProfile: state.currentProfile?.id === id ? null : state.currentProfile,
+        currentProfile:
+          state.currentProfile?.id === id ? null : state.currentProfile,
         loading: false,
       }));
     } catch (err: any) {
       set({
-        error: err.response?.data?.detail || err.response?.data?.message || "Failed to delete student profile",
+        error:
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Failed to delete student profile",
         loading: false,
       });
     }
@@ -198,25 +239,29 @@ export const useStudentProfileStore = create<StudentProfileState>()((set) => ({
 
   getStudentsByGrade: async (grade?: string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const url = grade 
+      const url = grade
         ? `${StudentProfileApi.getStudentsByGrade}?grade=${grade}`
         : StudentProfileApi.getStudentsByGrade;
-        
+
       const res = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const profilesData = res.data.data || res.data.results || res.data;
-      
-      set({ profiles: Array.isArray(profilesData) ? profilesData : [], loading: false });
+
+      set({
+        profiles: Array.isArray(profilesData) ? profilesData : [],
+        loading: false,
+      });
     } catch (err: any) {
       set({
-        error: err.response?.data?.detail || "Failed to fetch students by grade",
+        error:
+          err.response?.data?.detail || "Failed to fetch students by grade",
         loading: false,
         profiles: [],
       });

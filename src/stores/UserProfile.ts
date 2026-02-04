@@ -26,12 +26,18 @@ interface UserProfileState {
   loading: boolean;
   error: string | null;
   currentProfile: UserProfileData | null;
-  
+
   fetchUserProfiles: () => Promise<void>;
   getUserProfile: (id: number | string) => Promise<void>;
   createUserProfile: (profileData: Partial<UserProfileData>) => Promise<void>;
-  updateUserProfile: (id: number | string, profileData: Partial<UserProfileData>) => Promise<void>;
-  patchUserProfile: (id: number | string, profileData: Partial<UserProfileData>) => Promise<void>;
+  updateUserProfile: (
+    id: number | string,
+    profileData: Partial<UserProfileData>,
+  ) => Promise<void>;
+  patchUserProfile: (
+    id: number | string,
+    profileData: Partial<UserProfileData>,
+  ) => Promise<void>;
   deleteUserProfile: (id: number | string) => Promise<void>;
   clearError: () => void;
 }
@@ -44,7 +50,7 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
 
   fetchUserProfiles: async () => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(UserProfileApi.fetchUserProfiles, {
@@ -52,10 +58,13 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const profilesData = res.data.data || res.data.results || res.data;
-      
-      set({ profiles: Array.isArray(profilesData) ? profilesData : [], loading: false });
+
+      set({
+        profiles: Array.isArray(profilesData) ? profilesData : [],
+        loading: false,
+      });
     } catch (err: any) {
       console.error("Fetch User Profiles Error:", err.response?.data);
       set({
@@ -68,7 +77,7 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
 
   getUserProfile: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(UserProfileApi.getUserProfile(id), {
@@ -76,11 +85,10 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       const profileData = res.data.data || res.data;
       set({ currentProfile: profileData, loading: false });
     } catch (err: any) {
-      console.log("User profile not found:", err.response?.status);
       set({
         error: err.response?.data?.detail || "Failed to fetch user profile",
         loading: false,
@@ -91,47 +99,64 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
 
   createUserProfile: async (profileData: Partial<UserProfileData>) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(UserProfileApi.createUserProfile, profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.post(
+        UserProfileApi.createUserProfile,
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       const newProfile = res.data.data || res.data;
-      
+
       set((state) => ({
         profiles: [...state.profiles, newProfile],
         loading: false,
       }));
     } catch (err: any) {
       set({
-        error: err.response?.data?.detail || err.response?.data?.message || "Failed to create user profile",
+        error:
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Failed to create user profile",
         loading: false,
       });
     }
   },
 
-  updateUserProfile: async (id: number | string, profileData: Partial<UserProfileData>) => {
+  updateUserProfile: async (
+    id: number | string,
+    profileData: Partial<UserProfileData>,
+  ) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.put(UserProfileApi.updateUserProfile(id), profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.put(
+        UserProfileApi.updateUserProfile(id),
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       const updatedProfile = res.data.data || res.data;
-      
+
       set((state) => ({
-        profiles: state.profiles.map((profile) => 
-          profile.id === id ? updatedProfile : profile
+        profiles: state.profiles.map((profile) =>
+          profile.id === id ? updatedProfile : profile,
         ),
-        currentProfile: state.currentProfile?.id === id ? updatedProfile : state.currentProfile,
+        currentProfile:
+          state.currentProfile?.id === id
+            ? updatedProfile
+            : state.currentProfile,
         loading: false,
       }));
     } catch (err: any) {
@@ -142,24 +167,34 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
     }
   },
 
-  patchUserProfile: async (id: number | string, profileData: Partial<UserProfileData>) => {
+  patchUserProfile: async (
+    id: number | string,
+    profileData: Partial<UserProfileData>,
+  ) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.patch(UserProfileApi.patchUserProfile(id), profileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await axios.patch(
+        UserProfileApi.patchUserProfile(id),
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       const updatedProfile = res.data.data || res.data;
-      
+
       set((state) => ({
-        profiles: state.profiles.map((profile) => 
-          profile.id === id ? updatedProfile : profile
+        profiles: state.profiles.map((profile) =>
+          profile.id === id ? updatedProfile : profile,
         ),
-        currentProfile: state.currentProfile?.id === id ? updatedProfile : state.currentProfile,
+        currentProfile:
+          state.currentProfile?.id === id
+            ? updatedProfile
+            : state.currentProfile,
         loading: false,
       }));
     } catch (err: any) {
@@ -172,7 +207,7 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
 
   deleteUserProfile: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       await axios.delete(UserProfileApi.deleteUserProfile(id), {
@@ -180,15 +215,19 @@ export const useUserProfileStore = create<UserProfileState>()((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       set((state) => ({
         profiles: state.profiles.filter((profile) => profile.id !== id),
-        currentProfile: state.currentProfile?.id === id ? null : state.currentProfile,
+        currentProfile:
+          state.currentProfile?.id === id ? null : state.currentProfile,
         loading: false,
       }));
     } catch (err: any) {
       set({
-        error: err.response?.data?.detail || err.response?.data?.message || "Failed to delete user profile",
+        error:
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Failed to delete user profile",
         loading: false,
       });
     }

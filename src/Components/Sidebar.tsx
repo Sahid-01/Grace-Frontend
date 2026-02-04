@@ -1,12 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  User,
-  Settings,
-  BarChart3,
-  FileText,
-  Users,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Users } from "lucide-react";
 import { useAuthStore } from "@/stores/auth";
 
 interface SidebarProps {
@@ -36,10 +29,10 @@ const Sidebar = ({
       hideForRoles: ["student"], // Hide for students
     },
     {
-      name : "classes",
-      path : "/classes",
+      name: "classes",
+      path: "/classes",
       icon: <FileText className="w-5 h-5" />,
-    }
+    },
     // {
     //   name: "Profile",
     //   path: "/profile",
@@ -60,7 +53,6 @@ const Sidebar = ({
     //   path: "/reports",
     //   icon: <FileText className="w-5 h-5" />,
     // },
-
   ];
 
   // Filter menu items based on user role

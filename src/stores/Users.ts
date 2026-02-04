@@ -21,40 +21,49 @@ interface UsersState {
   loading: boolean;
   error: string | null;
   currentUser: UserData | null;
-  
+
   // Fetch all users
   fetchUsers: () => Promise<void>;
-  
+
   // Fetch users by role
   fetchUsersByRole: (role: string) => Promise<void>;
-  
+
   // Get single user
   getUser: (id: number | string) => Promise<void>;
-  
+
   // Create user (role-based)
-  createUser: (userData: Partial<UserData>, currentUserRole: string) => Promise<void>;
-  
+  createUser: (
+    userData: Partial<UserData>,
+    currentUserRole: string,
+  ) => Promise<void>;
+
   // Update user
-  updateUser: (id: number | string, userData: Partial<UserData>) => Promise<void>;
-  
+  updateUser: (
+    id: number | string,
+    userData: Partial<UserData>,
+  ) => Promise<void>;
+
   // Patch user
-  patchUser: (id: number | string, userData: Partial<UserData>) => Promise<void>;
-  
+  patchUser: (
+    id: number | string,
+    userData: Partial<UserData>,
+  ) => Promise<void>;
+
   // Delete user
   deleteUser: (id: number | string) => Promise<void>;
-  
+
   // Activate user
   activateUser: (id: number | string) => Promise<void>;
-  
+
   // Deactivate user
   deactivateUser: (id: number | string) => Promise<void>;
-  
+
   // Change password
   changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
-  
+
   // Clear error
   clearError: () => void;
-  
+
   // Check if user can add role
   canAddRole: (currentUserRole: string, targetRole: string) => boolean;
 }
@@ -69,29 +78,29 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
   canAddRole: (currentUserRole: string, targetRole: string): boolean => {
     const role = currentUserRole.toLowerCase();
     const target = targetRole.toLowerCase();
-    
+
     // Superadmin can add anyone
     if (role === "superadmin") {
       return true;
     }
-    
+
     // Admin can add everyone except superadmin
     if (role === "admin") {
       return target !== "superadmin";
     }
-    
+
     // Teacher can only add students
     if (role === "teacher") {
       return target === "student";
     }
-    
+
     // Other roles cannot add users
     return false;
   },
 
   fetchUsers: async () => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(UserApi.fetchUsers, {
@@ -99,16 +108,15 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
-      
+
       // Handle nested response structure
       const usersData = res.data.data || res.data.results || res.data;
-      
+
       // Filter out deleted users
-      const activeUsers = Array.isArray(usersData) 
-        ? usersData.filter((user: UserData) => !user.is_deleted) 
+      const activeUsers = Array.isArray(usersData)
+        ? usersData.filter((user: UserData) => !user.is_deleted)
         : [];
-      
+
       set({ users: activeUsers, loading: false });
     } catch (err: any) {
       console.error("Fetch Users Error:", err.response?.data);
@@ -122,7 +130,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   fetchUsersByRole: async (role: string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(UserApi.getUsersByRole, {
@@ -131,15 +139,15 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       // Handle nested response structure
       const usersData = res.data.data || res.data.results || res.data;
-      
+
       // Filter out deleted users
-      const activeUsers = Array.isArray(usersData) 
-        ? usersData.filter((user: UserData) => !user.is_deleted) 
+      const activeUsers = Array.isArray(usersData)
+        ? usersData.filter((user: UserData) => !user.is_deleted)
         : [];
-      
+
       set({ users: activeUsers, loading: false });
     } catch (err: any) {
       set({
@@ -152,7 +160,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   getUser: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(UserApi.getUser(id), {
@@ -160,7 +168,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       set({ currentUser: res.data, loading: false });
     } catch (err: any) {
       set({
@@ -172,7 +180,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   createUser: async (userData: Partial<UserData>, currentUserRole: string) => {
     set({ loading: true, error: null });
-    
+
     // Check permission
     if (!get().canAddRole(currentUserRole, userData.role || "")) {
       set({
@@ -181,7 +189,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
       });
       return;
     }
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(UserApi.createUser, userData, {
@@ -189,10 +197,10 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       // Handle nested response structure
       const newUser = res.data.data || res.data;
-      
+
       // Add new user to the list
       set((state) => ({
         users: [...state.users, newUser],
@@ -200,7 +208,10 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
       }));
     } catch (err: any) {
       set({
-        error: err.response?.data?.detail || err.response?.data?.message || "Failed to create user",
+        error:
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Failed to create user",
         loading: false,
       });
     }
@@ -208,7 +219,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   updateUser: async (id: number | string, userData: Partial<UserData>) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.put(UserApi.updateUser(id), userData, {
@@ -216,12 +227,10 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       // Update user in the list
       set((state) => ({
-        users: state.users.map((user) => 
-          user.id === id ? res.data : user
-        ),
+        users: state.users.map((user) => (user.id === id ? res.data : user)),
         loading: false,
       }));
     } catch (err: any) {
@@ -234,7 +243,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   patchUser: async (id: number | string, userData: Partial<UserData>) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(UserApi.patchUser(id), userData, {
@@ -242,12 +251,10 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       // Update user in the list
       set((state) => ({
-        users: state.users.map((user) => 
-          user.id === id ? res.data : user
-        ),
+        users: state.users.map((user) => (user.id === id ? res.data : user)),
         loading: false,
       }));
     } catch (err: any) {
@@ -260,19 +267,14 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   deleteUser: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      console.log("Deleting user with ID:", id);
-      
       await axios.delete(UserApi.deleteUser(id), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
-      console.log("User deleted successfully");
-      
       // Remove user from the list
       set((state) => ({
         users: state.users.filter((user) => user.id !== id),
@@ -281,7 +283,10 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
     } catch (err: any) {
       console.error("Delete user error:", err.response?.data);
       set({
-        error: err.response?.data?.detail || err.response?.data?.message || "Failed to delete user",
+        error:
+          err.response?.data?.detail ||
+          err.response?.data?.message ||
+          "Failed to delete user",
         loading: false,
       });
     }
@@ -289,19 +294,23 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   activateUser: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      await axios.post(UserApi.activateUser(id), {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.post(
+        UserApi.activateUser(id),
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       // Update user status in the list
       set((state) => ({
-        users: state.users.map((user) => 
-          user.id === id ? { ...user, is_active: true } : user
+        users: state.users.map((user) =>
+          user.id === id ? { ...user, is_active: true } : user,
         ),
         loading: false,
       }));
@@ -315,19 +324,23 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   deactivateUser: async (id: number | string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
-      await axios.post(UserApi.deactivateUser(id), {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      await axios.post(
+        UserApi.deactivateUser(id),
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
-      
+      );
+
       // Update user status in the list
       set((state) => ({
-        users: state.users.map((user) => 
-          user.id === id ? { ...user, is_active: false } : user
+        users: state.users.map((user) =>
+          user.id === id ? { ...user, is_active: false } : user,
         ),
         loading: false,
       }));
@@ -341,7 +354,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
 
   changePassword: async (oldPassword: string, newPassword: string) => {
     set({ loading: true, error: null });
-    
+
     try {
       const token = localStorage.getItem("token");
       await axios.post(
@@ -354,9 +367,9 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
-      
+
       set({ loading: false });
     } catch (err: any) {
       set({

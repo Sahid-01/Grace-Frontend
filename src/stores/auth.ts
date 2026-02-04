@@ -96,7 +96,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     // Try to call logout API if we have tokens
     if (token && refresh) {
       try {
-
         await axios.post(
           authAPI.logout,
           {
@@ -157,7 +156,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       loading: false,
       error: null,
     });
-
 
     // Force navigation to login page
     // Using window.location for a hard refresh to clear any cached state
@@ -229,7 +227,6 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-
       // Clear local storage
       localStorage.removeItem("token");
       localStorage.removeItem("refresh");

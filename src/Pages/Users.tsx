@@ -1,10 +1,29 @@
 import { useEffect, useState, useRef } from "react";
 import { useUsersStore } from "@/stores/Users";
 import { useAuthStore } from "@/stores/auth";
-import { Users as UsersIcon, Plus, Trash2, X, CheckCircle, XCircle, Edit } from "lucide-react";
+import {
+  Users as UsersIcon,
+  Plus,
+  Trash2,
+  X,
+  CheckCircle,
+  XCircle,
+  Edit,
+} from "lucide-react";
 
 const Users = () => {
-  const { users, loading, error, fetchUsers, deleteUser, activateUser, deactivateUser, createUser, updateUser, clearError } = useUsersStore();
+  const {
+    users,
+    loading,
+    error,
+    fetchUsers,
+    deleteUser,
+    activateUser,
+    deactivateUser,
+    createUser,
+    updateUser,
+    clearError,
+  } = useUsersStore();
   const { user: currentUser } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -28,14 +47,16 @@ const Users = () => {
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!currentUser?.role) {
       alert("Unable to determine your role");
       return;
@@ -62,7 +83,7 @@ const Users = () => {
     } else {
       await createUser(userData, currentUser.role);
     }
-    
+
     if (!error) {
       setIsModalOpen(false);
       setIsEditMode(false);
@@ -133,20 +154,20 @@ const Users = () => {
 
   const getAvailableRoles = () => {
     const role = currentUser?.role?.toLowerCase();
-    
+
     // Superadmin can create admin, teacher, student (but NOT superadmin)
     if (role === "superadmin") {
       return ["admin", "teacher", "student"];
-    } 
+    }
     // Admin can create teacher and student only (NOT admin or superadmin)
     else if (role === "admin") {
       return ["teacher", "student"];
-    } 
+    }
     // Teacher can create student only
     else if (role === "teacher") {
       return ["student"];
     }
-    
+
     return ["student"];
   };
 
@@ -169,8 +190,12 @@ const Users = () => {
           <div className="flex items-center gap-3">
             <UsersIcon className="w-8 h-8" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold">Users Management</h1>
-              <p className="text-emerald-100 mt-1">Manage all users in the system</p>
+              <h1 className="text-2xl sm:text-3xl font-bold">
+                Users Management
+              </h1>
+              <p className="text-emerald-100 mt-1">
+                Manage all users in the system
+              </p>
             </div>
           </div>
           <button
@@ -217,88 +242,104 @@ const Users = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {Array.isArray(users) && users
-                .filter((user) => user.role?.toLowerCase() !== "superadmin")
-                .map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        {user.first_name?.charAt(0).toUpperCase() || user.username.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {user.first_name && user.last_name
-                            ? `${user.first_name} ${user.last_name}`
-                            : user.full_name || user.username}
-                        </p>
-                        <p className="text-sm text-gray-500">@{user.username}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 capitalize">
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">
-                    {user.role?.toLowerCase() === "student" 
-                      ? (user.student_id || "-")
-                      : (user.employee_id || "-")
-                    }
-                  </td>
-                  <td className="px-6 py-4">
-                    {user.is_active ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        <CheckCircle className="w-3 h-3" />
-                        Active
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                        <XCircle className="w-3 h-3" />
-                        Inactive
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
-                        title="Edit"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      {currentUser?.id !== user.id && (
-                        <>
+              {Array.isArray(users) &&
+                users
+                  .filter((user) => user.role?.toLowerCase() !== "superadmin")
+                  .map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            {user.first_name?.charAt(0).toUpperCase() ||
+                              user.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {user.first_name && user.last_name
+                                ? `${user.first_name} ${user.last_name}`
+                                : user.full_name || user.username}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              @{user.username}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">{user.email}</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 capitalize">
+                          {user.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">
+                        {user.role?.toLowerCase() === "student"
+                          ? user.student_id || "-"
+                          : user.employee_id || "-"}
+                      </td>
+                      <td className="px-6 py-4">
+                        {user.is_active ? (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            <CheckCircle className="w-3 h-3" />
+                            Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                            <XCircle className="w-3 h-3" />
+                            Inactive
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => handleToggleActive(user.id, user.is_active || false)}
-                            className={`p-2 rounded-lg transition ${
-                              user.is_active
-                                ? "bg-red-50 text-red-600 hover:bg-red-100"
-                                : "bg-green-50 text-green-600 hover:bg-green-100"
-                            }`}
-                            title={user.is_active ? "Deactivate" : "Activate"}
+                            onClick={() => handleEdit(user)}
+                            className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                            title="Edit"
                           >
-                            {user.is_active ? <XCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+                            <Edit className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
-                      {currentUser?.id === user.id && (
-                        <span className="text-xs text-gray-500 italic px-2">You</span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                          {currentUser?.id !== user.id && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleToggleActive(
+                                    user.id,
+                                    user.is_active || false,
+                                  )
+                                }
+                                className={`p-2 rounded-lg transition ${
+                                  user.is_active
+                                    ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                    : "bg-green-50 text-green-600 hover:bg-green-100"
+                                }`}
+                                title={
+                                  user.is_active ? "Deactivate" : "Activate"
+                                }
+                              >
+                                {user.is_active ? (
+                                  <XCircle className="w-4 h-4" />
+                                ) : (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                              </button>
+                              <button
+                                onClick={() => handleDelete(user.id)}
+                                className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          {currentUser?.id === user.id && (
+                            <span className="text-xs text-gray-500 italic px-2">
+                              You
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
@@ -307,7 +348,9 @@ const Users = () => {
           <div className="text-center py-12">
             <UsersIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">No users found</p>
-            <p className="text-gray-400 text-sm mt-2">Click "Add New User" to create your first user</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Click "Add New User" to create your first user
+            </p>
           </div>
         )}
       </div>
@@ -392,8 +435,13 @@ const Users = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password {!isEditMode && <span className="text-red-500">*</span>}
-                    {isEditMode && <span className="text-gray-500 text-xs">(Leave blank to keep current)</span>}
+                    Password{" "}
+                    {!isEditMode && <span className="text-red-500">*</span>}
+                    {isEditMode && (
+                      <span className="text-gray-500 text-xs">
+                        (Leave blank to keep current)
+                      </span>
+                    )}
                   </label>
                   <input
                     type="password"
@@ -463,7 +511,13 @@ const Users = () => {
                   disabled={loading}
                   className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50"
                 >
-                  {loading ? (isEditMode ? "Updating..." : "Creating...") : (isEditMode ? "Update User" : "Create User")}
+                  {loading
+                    ? isEditMode
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditMode
+                      ? "Update User"
+                      : "Create User"}
                 </button>
                 <button
                   type="button"
