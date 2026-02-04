@@ -1,30 +1,39 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Navbar from "../Components/Navbar";
-import { useAuthStore } from "../stores/auth";
+import Navbar from "@/Components/Navbar";
+import Sidebar from "@/Components/Sidebar";
 
 const Layout = () => {
-  const { user, logout } = useAuthStore();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   return (
-    <div>
-      <header>
-        <Navbar user={user} onLogout={handleLogout} />
-      </header>
-
-      <main>
-        {/* Nested routes will render here */}
-        <Outlet />
-      </main>
-
-      <footer className="bg-gray-100 py-4 mt-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-gray-600">
-          <p>© 2026 My App</p>
-        </div>
-      </footer>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      <Navbar />
+      <div className="flex">
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={toggleSidebar}
+        />
+        <main
+          className={`flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-in-out ${
+            isSidebarCollapsed ? "ml-0" : "ml-0"
+          }`}
+          style={{
+            width: isSidebarCollapsed
+              ? "calc(100% - 4rem)"
+              : "calc(100% - 16rem)",
+            marginLeft: isSidebarCollapsed ? "4rem" : "16rem",
+          }}
+        >
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

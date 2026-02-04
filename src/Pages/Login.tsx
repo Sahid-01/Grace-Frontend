@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
-import { loginUser } from "../Utils/api";
 import { useAuthStore } from "../stores/auth";
 
 interface LoginErrors {
@@ -14,12 +13,11 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuthStore();
+  const { login, isAuthenticated, loading, error, clearError } = useAuthStore();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -49,6 +47,9 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear any previous auth errors
+    clearError();
+
     // Validate
     const newErrors = validateForm();
     setErrors(newErrors);
@@ -57,10 +58,7 @@ const Login = () => {
       return;
     }
 
-    setIsLoading(true);
     try {
-      const response = await loginUser(username, password);
-
       // Store remember me preference
       if (rememberMe) {
         localStorage.setItem("rememberUsername", username);
@@ -68,61 +66,18 @@ const Login = () => {
         localStorage.removeItem("rememberUsername");
       }
 
-      // Update auth store with user data and token
-      const userData = {
-        id: response.user?.id || response.id || "1",
-        username: response.user?.username || username,
-        name: response.user?.name || response.name,
-        full_name: response.user?.full_name || response.full_name,
-        role: response.user?.role || response.role,
-      };
-
-      const token =
-        response.token ||
-        response.access_token ||
-        response.authToken ||
-        response.access ||
-        response.jwt;
-
-      // console.log('=== LOGIN DEBUG ===')
-      // console.log('Full API Response:', JSON.stringify(response, null, 2))
-      // console.log('Available keys:', Object.keys(response))
-      // console.log('Extracted token:', token)
-      // console.log('Token type:', typeof token)
-      // console.log('=== END DEBUG ===')
-
-      if (!token || token === "undefined" || token === null) {
-        console.error("No valid token found in response");
-        setErrors({
-          submit:
-            "No authentication token received from server. Please check your credentials.",
-        });
-        return;
-      }
-
-      // Save to auth store
-      login(token, userData);
-
-      // console.log('User data saved:', userData)
-      // console.log('Token saved to localStorage:', localStorage.getItem('authToken'))
-      // console.log('Auth store token:', token)
+      // Use the auth store login method
+      await login({ username, password });
 
       setSuccess(true);
-      // console.log('Login successful:', response)
 
       // Redirect to dashboard after 1.5 seconds
       setTimeout(() => {
         navigate("/dashboard");
       }, 1500);
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        "Login failed. Please try again.";
-      setErrors({ submit: errorMessage });
       console.error("Login error:", error);
-    } finally {
-      setIsLoading(false);
+      // Error is handled by the auth store
     }
   };
 
@@ -166,6 +121,13 @@ const Login = () => {
             </div>
           )}
 
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              <span className="text-red-700 font-medium">{error}</span>
+            </div>
+          )}
+
           {errors.submit && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-600" />
@@ -187,12 +149,12 @@ const Login = () => {
                     handleInputChange("username", e.target.value)
                   }
                   placeholder="Enter your username"
-                  disabled={isLoading}
+                  disabled={loading}
                   className={`w-full px-4 py-3 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                     errors.username
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-gray-50 focus:border-emerald-500"
-                  } ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                  } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
                 />
               </div>
               {errors.username && (
@@ -216,17 +178,17 @@ const Login = () => {
                     handleInputChange("password", e.target.value)
                   }
                   placeholder="••••••••"
-                  disabled={isLoading}
+                  disabled={loading}
                   className={`w-full px-4 py-3 rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
                     errors.password
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-gray-50 focus:border-emerald-500"
-                  } ${isLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                  } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
+                  disabled={loading}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
                 >
                   {showPassword ? (
@@ -251,7 +213,7 @@ const Login = () => {
                 id="rememberMe"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                disabled={isLoading}
+                disabled={loading}
                 className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer disabled:opacity-60"
               />
               <label
@@ -265,14 +227,14 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className={`w-full py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                isLoading
+                loading
                   ? "bg-emerald-400 text-white cursor-not-allowed"
                   : "bg-emerald-600 hover:bg-emerald-700 text-white"
               }`}
             >
-              {isLoading ? (
+              {loading ? (
                 <>
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   Signing in...
