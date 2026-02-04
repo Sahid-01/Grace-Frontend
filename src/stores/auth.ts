@@ -89,7 +89,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   logout: async () => {
-    console.log("Logout process started");
     set({ loading: true, error: null });
 
     const { token, refresh } = get();
@@ -97,7 +96,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     // Try to call logout API if we have tokens
     if (token && refresh) {
       try {
-        console.log("Attempting logout with refresh token");
 
         await axios.post(
           authAPI.logout,
@@ -111,7 +109,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
             },
           },
         );
-        console.log("Logout API call successful");
       } catch (err: any) {
         console.warn(
           "First logout attempt failed, trying with 'refresh' key:",
@@ -132,7 +129,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
               },
             },
           );
-          console.log("Logout API call successful on second attempt");
         } catch (secondErr: any) {
           console.warn(
             "Both logout attempts failed, continuing with local cleanup:",
@@ -145,7 +141,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
 
     // CRITICAL: Clear all local state and storage
-    console.log("Clearing local storage and state");
     localStorage.removeItem("token");
     localStorage.removeItem("refresh");
 
@@ -163,7 +158,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       error: null,
     });
 
-    console.log("Logout process completed, state cleared");
 
     // Force navigation to login page
     // Using window.location for a hard refresh to clear any cached state
@@ -177,7 +171,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     // Prevent multiple simultaneous calls
     if (isFetchingUser) {
-      console.log("Already fetching user, skipping");
       return;
     }
 
@@ -199,7 +192,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
       // If 401, user is not authenticated
       if (err.response?.status === 401) {
-        console.log("Unauthorized, clearing auth state");
         localStorage.removeItem("token");
         localStorage.removeItem("refresh");
         delete axios.defaults.headers.common["Authorization"];
@@ -237,7 +229,6 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.log("401 Unauthorized - clearing auth and redirecting to login");
 
       // Clear local storage
       localStorage.removeItem("token");

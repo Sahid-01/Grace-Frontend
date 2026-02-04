@@ -2,6 +2,7 @@ import Layout from "@/layouts/Layout";
 import Login from "@/Pages/Login";
 import Dashboard from "@/Pages/Dashboard";
 import Profile from "@/Pages/Profile";
+import Users from "@/Pages/Users";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import type { ReactElement } from "react";
 import { useAuthStore } from "@/stores/auth";
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <ProtectedRoute element={<Dashboard />} />,
+      },
+      {
+        path: "users",
+        element: <ProtectedRoute element={<Users />} />,
       },
       {
         path: "profile",

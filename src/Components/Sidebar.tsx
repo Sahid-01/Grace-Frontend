@@ -5,7 +5,9 @@ import {
   Settings,
   BarChart3,
   FileText,
+  Users,
 } from "lucide-react";
+import { useAuthStore } from "@/stores/auth";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -19,12 +21,19 @@ const Sidebar = ({
   onItemClick,
 }: SidebarProps) => {
   const location = useLocation();
+  const { user } = useAuthStore();
 
   const menuItems = [
     {
       name: "Dashboard",
       path: "/dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
+    },
+    {
+      name: "Users",
+      path: "/users",
+      icon: <Users className="w-5 h-5" />,
+      hideForRoles: ["student"], // Hide for students
     },
     {
       name: "Profile",
@@ -47,6 +56,14 @@ const Sidebar = ({
       icon: <FileText className="w-5 h-5" />,
     },
   ];
+
+  // Filter menu items based on user role
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.hideForRoles && user?.role) {
+      return !item.hideForRoles.includes(user.role.toLowerCase());
+    }
+    return true;
+  });
 
   return (
     <div
@@ -89,7 +106,7 @@ const Sidebar = ({
       {/* Navigation Menu */}
       <nav className="p-4 overflow-y-auto h-[calc(100%-5rem)]">
         <ul className="space-y-2">
-          {menuItems.map((item) => {
+          {filteredMenuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <li key={item.path}>
