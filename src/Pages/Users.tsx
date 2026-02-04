@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useUsersStore } from "@/stores/Users";
 import { useAuthStore } from "@/stores/auth";
 import { Users as UsersIcon, Plus, Trash2, X, CheckCircle, XCircle, Edit } from "lucide-react";
@@ -9,6 +9,7 @@ const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
+  const hasFetched = useRef(false);
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -21,7 +22,10 @@ const Users = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
+    if (!hasFetched.current) {
+      fetchUsers();
+      hasFetched.current = true;
+    }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

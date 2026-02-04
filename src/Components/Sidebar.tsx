@@ -36,25 +36,31 @@ const Sidebar = ({
       hideForRoles: ["student"], // Hide for students
     },
     {
-      name: "Profile",
-      path: "/profile",
-      icon: <User className="w-5 h-5" />,
-    },
-    {
-      name: "Settings",
-      path: "/settings",
-      icon: <Settings className="w-5 h-5" />,
-    },
-    {
-      name: "Analytics",
-      path: "/analytics",
-      icon: <BarChart3 className="w-5 h-5" />,
-    },
-    {
-      name: "Reports",
-      path: "/reports",
+      name : "classes",
+      path : "/classes",
       icon: <FileText className="w-5 h-5" />,
-    },
+    }
+    // {
+    //   name: "Profile",
+    //   path: "/profile",
+    //   icon: <User className="w-5 h-5" />,
+    // },
+    // {
+    //   name: "Settings",
+    //   path: "/settings",
+    //   icon: <Settings className="w-5 h-5" />,
+    // },
+    // {
+    //   name: "Analytics",
+    //   path: "/analytics",
+    //   icon: <BarChart3 className="w-5 h-5" />,
+    // },
+    // {
+    //   name: "Reports",
+    //   path: "/reports",
+    //   icon: <FileText className="w-5 h-5" />,
+    // },
+
   ];
 
   // Filter menu items based on user role

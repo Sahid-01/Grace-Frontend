@@ -11,6 +11,7 @@ export interface UserData {
   last_name?: string;
   role: string;
   is_active?: boolean;
+  is_deleted?: boolean;
   student_id?: string | null;
   employee_id?: string | null;
 }
@@ -103,7 +104,12 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
       // Handle nested response structure
       const usersData = res.data.data || res.data.results || res.data;
       
-      set({ users: Array.isArray(usersData) ? usersData : [], loading: false });
+      // Filter out deleted users
+      const activeUsers = Array.isArray(usersData) 
+        ? usersData.filter((user: UserData) => !user.is_deleted) 
+        : [];
+      
+      set({ users: activeUsers, loading: false });
     } catch (err: any) {
       console.error("Fetch Users Error:", err.response?.data);
       set({
@@ -128,7 +134,13 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
       
       // Handle nested response structure
       const usersData = res.data.data || res.data.results || res.data;
-      set({ users: Array.isArray(usersData) ? usersData : [], loading: false });
+      
+      // Filter out deleted users
+      const activeUsers = Array.isArray(usersData) 
+        ? usersData.filter((user: UserData) => !user.is_deleted) 
+        : [];
+      
+      set({ users: activeUsers, loading: false });
     } catch (err: any) {
       set({
         error: err.response?.data?.detail || "Failed to fetch users by role",
@@ -251,11 +263,15 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
     
     try {
       const token = localStorage.getItem("token");
+      console.log("Deleting user with ID:", id);
+      
       await axios.delete(UserApi.deleteUser(id), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+      
+      console.log("User deleted successfully");
       
       // Remove user from the list
       set((state) => ({
@@ -263,8 +279,9 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
         loading: false,
       }));
     } catch (err: any) {
+      console.error("Delete user error:", err.response?.data);
       set({
-        error: err.response?.data?.detail || "Failed to delete user",
+        error: err.response?.data?.detail || err.response?.data?.message || "Failed to delete user",
         loading: false,
       });
     }
