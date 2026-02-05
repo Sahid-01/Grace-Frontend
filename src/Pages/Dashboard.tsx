@@ -1,19 +1,28 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth";
+import { useUsersStore } from "@/stores/Users";
+import { useCoursesStore } from "@/stores/Course";
+import { useSectionsStore } from "@/stores/Sections";
+import { useLessonsStore } from "@/stores/Lessions";
+import { Users, BookOpen, GraduationCap, Award } from "lucide-react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { user, isAuthenticated, loading, error, logout, self, clearError } =
     useAuthStore();
+  const { users, fetchUsers } = useUsersStore();
+  const { courses, fetchCourses } = useCoursesStore();
+  const { sections, fetchSections } = useSectionsStore();
+  const { fetchLessons } = useLessonsStore();
 
   // Fetch user data from self API
   useEffect(() => {
     const fetchUserData = async () => {
       if (!isAuthenticated) {
-        // Redirect will be handled by Layout component
         return;
       }
 
-      // Only fetch if we don't have user data yet
       if (!user) {
         try {
           clearError();
@@ -21,7 +30,6 @@ const Dashboard = () => {
         } catch (err: any) {
           console.error("Error fetching user data:", err);
           if (err.response?.status === 401) {
-            // Token expired or invalid - logout will be handled by navbar
             await logout();
           }
         }
@@ -29,17 +37,38 @@ const Dashboard = () => {
     };
 
     fetchUserData();
-  }, [isAuthenticated, user]); // Removed navigate, self, logout, clearError from dependencies
+  }, [isAuthenticated, user]);
 
-  // Debug log to see user state
-  useEffect(() => {}, [user, isAuthenticated, loading, error]);
+  // Fetch stats data
+  useEffect(() => {
+    if (user && user.role !== "student") {
+      fetchUsers();
+    }
+    fetchCourses();
+    fetchSections();
+    fetchLessons();
+  }, [user]);
+
+  // Calculate stats
+  const totalStudents =
+    users?.filter((u) => u.role?.toLowerCase() === "student").length || 0;
+  const totalTeachers =
+    users?.filter((u) => u.role?.toLowerCase() === "teacher").length || 0;
+  const totalCourses = courses?.length || 0;
+  const totalSections = sections?.length || 0;
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading user data...</p>
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-[#1a365d] border-r-[#2c5282] animate-spin"></div>
+          </div>
+          <p className="text-gray-800 font-semibold text-lg">
+            Loading Dashboard...
+          </p>
+          <p className="text-gray-500 text-sm mt-2">Please wait</p>
         </div>
       </div>
     );
@@ -47,14 +76,17 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700">{error}</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-red-200">
+            <span className="text-4xl">⚠️</span>
+          </div>
+          <div className="mb-6 p-6 bg-white border border-red-200 rounded-lg shadow-sm">
+            <p className="text-red-700 font-semibold text-lg">{error}</p>
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+            className="px-6 py-3 bg-[#c41e3a] text-white rounded-lg hover:bg-[#a01629] transition-colors shadow-sm font-semibold"
           >
             Retry
           </button>
@@ -65,12 +97,17 @@ const Dashboard = () => {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">No user data available</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 border-2 border-gray-300">
+            <span className="text-4xl">👤</span>
+          </div>
+          <p className="text-gray-600 mb-6 text-lg font-medium">
+            No user data available
+          </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition"
+            className="px-6 py-3 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-colors shadow-sm font-semibold"
           >
             Retry
           </button>
@@ -80,138 +117,196 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 sm:p-8 text-white">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-          Welcome back,{" "}
-          {user?.first_name && user?.last_name
-            ? `${user.first_name} ${user.last_name}`
-            : user?.full_name || user?.name || user?.username || "User"}
-          ! 👋
-        </h1>
-        <p className="text-emerald-100">
-          You have successfully logged in to your dashboard.
-        </p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 sm:p-6 rounded-lg border border-emerald-200">
-            <h3 className="text-base sm:text-lg font-semibold text-emerald-900 mb-2">
-              Username
-            </h3>
-            <p className="text-emerald-700 text-sm sm:text-base">
-              @{user?.username}
-            </p>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6 rounded-lg border border-blue-200">
-            <h3 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">
-              Full Name
-            </h3>
-            <p className="text-blue-700 font-medium text-sm sm:text-base">
+      <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-8 mb-8 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome back,{" "}
               {user?.first_name && user?.last_name
                 ? `${user.first_name} ${user.last_name}`
-                : user?.full_name || user?.name || "Not provided"}
+                : user?.full_name || user?.name || user?.username || "User"}
+            </h1>
+            <p className="text-blue-100 text-lg">
+              {user?.role === "student"
+                ? "Student Dashboard"
+                : user?.role === "teacher"
+                  ? "Teacher Dashboard"
+                  : "Administrator Dashboard"}
             </p>
           </div>
-
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 sm:p-6 rounded-lg border border-purple-200 sm:col-span-2 lg:col-span-1">
-            <h3 className="text-base sm:text-lg font-semibold text-purple-900 mb-2">
-              Email
-            </h3>
-            <p className="text-purple-700 font-medium text-sm sm:text-base break-all">
-              {user?.email || "Not provided"}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6">
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 sm:p-6 rounded-lg border border-orange-200">
-            <h3 className="text-base sm:text-lg font-semibold text-orange-900 mb-2">
-              Role
-            </h3>
-            <p className="text-orange-700 font-medium capitalize text-sm sm:text-base">
-              {user?.role || "User"}
-            </p>
-          </div>
-        </div>
-
-        {/* Additional User Info Section */}
-        <div className="mt-6 sm:mt-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 sm:p-6 border border-gray-200">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-            User Information
-          </h2>
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-              <span className="text-gray-600 text-sm sm:text-base">Email:</span>
-              <span className="font-medium text-gray-800 text-sm sm:text-base break-all">
-                {user?.email || "Not provided"}
-              </span>
-            </div>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-              <span className="text-gray-600 text-sm sm:text-base">
-                Username:
-              </span>
-              <span className="font-medium text-gray-800 text-sm sm:text-base">
-                @{user?.username}
-              </span>
-            </div>
-            {(user?.first_name || user?.last_name) && (
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-                <span className="text-gray-600 text-sm sm:text-base">
-                  Full Name:
-                </span>
-                <span className="font-medium text-gray-800 text-sm sm:text-base">
-                  {user?.first_name && user?.last_name
-                    ? `${user.first_name} ${user.last_name}`
-                    : user?.first_name || user?.last_name}
-                </span>
-              </div>
-            )}
-            {user?.role && (
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-                <span className="text-gray-600 text-sm sm:text-base">
-                  Role:
-                </span>
-                <span className="font-medium text-gray-800 capitalize text-sm sm:text-base">
-                  {user.role}
-                </span>
-              </div>
-            )}
-            {user?.student_id && (
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-                <span className="text-gray-600 text-sm sm:text-base">
-                  Student ID:
-                </span>
-                <span className="font-medium text-gray-800 text-sm sm:text-base">
-                  {user.student_id}
-                </span>
-              </div>
-            )}
-            {user?.employee_id && (
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-                <span className="text-gray-600 text-sm sm:text-base">
-                  Employee ID:
-                </span>
-                <span className="font-medium text-gray-800 text-sm sm:text-base">
-                  {user.employee_id}
-                </span>
-              </div>
-            )}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
-              <span className="text-gray-600 text-sm sm:text-base">
-                Account Status:
-              </span>
-              <span className="font-medium text-emerald-600 text-sm sm:text-base">
-                Active
-              </span>
-            </div>
-          </div>
+          <div className="hidden md:block"></div>
         </div>
       </div>
+
+      {/* Stats Cards - Only show for non-students */}
+      {user?.role !== "student" && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Overview Statistics
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* Total Students */}
+            <button
+              onClick={() => navigate("/users")}
+              className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-[#1a365d]/10 rounded-lg flex items-center justify-center group-hover:bg-[#1a365d]/20 transition-colors">
+                  <Users className="w-6 h-6 text-[#1a365d]" />
+                </div>
+                <Award className="w-5 h-5 text-gray-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-gray-600 mb-1 uppercase tracking-wide">
+                Total Students
+              </h3>
+              <p className="text-3xl font-bold text-gray-900">
+                {totalStudents}
+              </p>
+              <p className="text-xs text-[#1a365d] mt-3 font-medium">
+                View all students →
+              </p>
+            </button>
+
+            {/* Total Teachers */}
+            <button
+              onClick={() => navigate("/users")}
+              className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-[#2c5282]/10 rounded-lg flex items-center justify-center group-hover:bg-[#2c5282]/20 transition-colors">
+                  <Users className="w-6 h-6 text-[#2c5282]" />
+                </div>
+                <Award className="w-5 h-5 text-gray-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-gray-600 mb-1 uppercase tracking-wide">
+                Total Teachers
+              </h3>
+              <p className="text-3xl font-bold text-gray-900">
+                {totalTeachers}
+              </p>
+              <p className="text-xs text-[#2c5282] mt-3 font-medium">
+                View all teachers →
+              </p>
+            </button>
+
+            {/* Total Courses */}
+            <button
+              onClick={() => navigate("/classes")}
+              className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-[#c41e3a]/10 rounded-lg flex items-center justify-center group-hover:bg-[#c41e3a]/20 transition-colors">
+                  <BookOpen className="w-6 h-6 text-[#c41e3a]" />
+                </div>
+                <Award className="w-5 h-5 text-gray-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-gray-600 mb-1 uppercase tracking-wide">
+                Total Courses
+              </h3>
+              <p className="text-3xl font-bold text-gray-900">{totalCourses}</p>
+              <p className="text-xs text-[#c41e3a] mt-3 font-medium">
+                View all courses →
+              </p>
+            </button>
+
+            {/* Total Sections */}
+            <button
+              onClick={() => navigate("/classes")}
+              className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 bg-[#1a365d]/10 rounded-lg flex items-center justify-center group-hover:bg-[#1a365d]/20 transition-colors">
+                  <GraduationCap className="w-6 h-6 text-[#1a365d]" />
+                </div>
+                <Award className="w-5 h-5 text-gray-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-gray-600 mb-1 uppercase tracking-wide">
+                Total Sections
+              </h3>
+              <p className="text-3xl font-bold text-gray-900">
+                {totalSections}
+              </p>
+              <p className="text-xs text-[#1a365d] mt-3 font-medium">
+                View details →
+              </p>
+            </button>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <button
+                onClick={() => navigate("/users")}
+                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Users className="w-5 h-5 text-[#1a365d] mr-3" />
+                <span className="font-medium text-gray-700">Manage Users</span>
+              </button>
+              <button
+                onClick={() => navigate("/classes")}
+                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <BookOpen className="w-5 h-5 text-[#2c5282] mr-3" />
+                <span className="font-medium text-gray-700">
+                  Manage Courses
+                </span>
+              </button>
+              <button
+                onClick={() => navigate("/classes")}
+                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <GraduationCap className="w-5 h-5 text-[#c41e3a] mr-3" />
+                <span className="font-medium text-gray-700">View Reports</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student View */}
+      {user?.role === "student" && (
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Your Learning Journey
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Your Courses
+              </h3>
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <BookOpen className="w-12 h-12 text-[#1a365d] mx-auto mb-3" />
+                  <p className="text-gray-600">Start exploring your courses</p>
+                  <button
+                    onClick={() => navigate("/classes")}
+                    className="mt-4 px-6 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-colors"
+                  >
+                    View Courses
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Recent Activity
+              </h3>
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <Award className="w-12 h-12 text-[#c41e3a] mx-auto mb-3" />
+                  <p className="text-gray-600">No recent activity</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

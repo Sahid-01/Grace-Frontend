@@ -70,7 +70,6 @@ const Users = () => {
       role: formData.role,
     };
 
-    // Only include password for new users
     if (!isEditMode && formData.password) {
       userData.password = formData.password;
     }
@@ -155,16 +154,11 @@ const Users = () => {
   const getAvailableRoles = () => {
     const role = currentUser?.role?.toLowerCase();
 
-    // Superadmin can create admin, teacher, student (but NOT superadmin)
     if (role === "superadmin") {
       return ["admin", "teacher", "student"];
-    }
-    // Admin can create teacher and student only (NOT admin or superadmin)
-    else if (role === "admin") {
+    } else if (role === "admin") {
       return ["teacher", "student"];
-    }
-    // Teacher can create student only
-    else if (role === "teacher") {
+    } else if (role === "teacher") {
       return ["student"];
     }
 
@@ -175,32 +169,40 @@ const Users = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading users...</p>
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-[#1a365d] border-r-[#2c5282] animate-spin"></div>
+          </div>
+          <p className="text-gray-700 font-semibold text-lg">
+            Loading users...
+          </p>
+          <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 sm:p-8 text-white">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <UsersIcon className="w-8 h-8" />
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              <UsersIcon className="w-7 h-7" />
+            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold">
-                Users Management
+                User Management
               </h1>
-              <p className="text-emerald-100 mt-1">
+              <p className="text-blue-100 mt-1">
                 Manage all users in the system
               </p>
             </div>
           </div>
           <button
             onClick={handleAddNew}
-            className="flex items-center gap-2 bg-white text-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-50 transition font-medium"
+            className="flex items-center gap-2 bg-white text-[#1a365d] px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all font-semibold shadow-sm"
           >
             <Plus className="w-5 h-5" />
             Add New User
@@ -210,51 +212,59 @@ const Users = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <p className="text-red-700 font-semibold">{error}</p>
+          </div>
         </div>
       )}
 
       {/* Users Table */}
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   ID
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-100">
               {Array.isArray(users) &&
                 users
                   .filter((user) => user.role?.toLowerCase() !== "superadmin")
                   .map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition">
+                    <tr
+                      key={user.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          <div className="w-11 h-11 bg-gradient-to-br from-[#1a365d] to-[#2c5282] rounded-full flex items-center justify-center text-white font-bold shadow-sm">
                             {user.first_name?.charAt(0).toUpperCase() ||
                               user.username.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-semibold text-gray-900">
                               {user.first_name && user.last_name
                                 ? `${user.first_name} ${user.last_name}`
                                 : user.full_name || user.username}
@@ -267,7 +277,7 @@ const Users = () => {
                       </td>
                       <td className="px-6 py-4 text-gray-700">{user.email}</td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 capitalize">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#1a365d] capitalize">
                           {user.role}
                         </span>
                       </td>
@@ -278,13 +288,13 @@ const Users = () => {
                       </td>
                       <td className="px-6 py-4">
                         {user.is_active ? (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            <CheckCircle className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700">
+                            <CheckCircle className="w-3.5 h-3.5" />
                             Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                            <XCircle className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700">
+                            <XCircle className="w-3.5 h-3.5" />
                             Inactive
                           </span>
                         )}
@@ -293,7 +303,7 @@ const Users = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEdit(user)}
-                            className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                            className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all"
                             title="Edit"
                           >
                             <Edit className="w-4 h-4" />
@@ -307,7 +317,7 @@ const Users = () => {
                                     user.is_active || false,
                                   )
                                 }
-                                className={`p-2 rounded-lg transition ${
+                                className={`p-2 rounded-lg transition-all ${
                                   user.is_active
                                     ? "bg-red-50 text-red-600 hover:bg-red-100"
                                     : "bg-green-50 text-green-600 hover:bg-green-100"
@@ -324,7 +334,7 @@ const Users = () => {
                               </button>
                               <button
                                 onClick={() => handleDelete(user.id)}
-                                className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                                className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
                                 title="Delete"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -332,7 +342,7 @@ const Users = () => {
                             </>
                           )}
                           {currentUser?.id === user.id && (
-                            <span className="text-xs text-gray-500 italic px-2">
+                            <span className="text-xs text-[#1a365d] italic px-2 font-semibold">
                               You
                             </span>
                           )}
@@ -345,20 +355,31 @@ const Users = () => {
         </div>
 
         {(!users || users.length === 0) && !loading && (
-          <div className="text-center py-12">
-            <UsersIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No users found</p>
-            <p className="text-gray-400 text-sm mt-2">
+          <div className="text-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <UsersIcon className="w-12 h-12 text-gray-400" />
+            </div>
+            <p className="text-gray-600 text-xl font-semibold mb-2">
+              No users found
+            </p>
+            <p className="text-gray-400 text-sm mb-6">
               Click "Add New User" to create your first user
             </p>
+            <button
+              onClick={handleAddNew}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-all shadow-sm font-semibold"
+            >
+              <Plus className="w-5 h-5" />
+              Add First User
+            </button>
           </div>
         )}
       </div>
 
       {/* Add User Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-800">
                 {isEditMode ? "Edit User" : "Add New User"}
@@ -387,7 +408,7 @@ const Users = () => {
                     value={formData.username}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -401,7 +422,7 @@ const Users = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -415,7 +436,7 @@ const Users = () => {
                     value={formData.first_name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -429,7 +450,7 @@ const Users = () => {
                     value={formData.last_name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -449,7 +470,7 @@ const Users = () => {
                     value={formData.password}
                     onChange={handleInputChange}
                     required={!isEditMode}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -462,7 +483,7 @@ const Users = () => {
                     value={formData.role}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 capitalize"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] capitalize"
                   >
                     {getAvailableRoles().map((role) => (
                       <option key={role} value={role} className="capitalize">
@@ -481,7 +502,7 @@ const Users = () => {
                     name="student_id"
                     value={formData.student_id}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -494,7 +515,7 @@ const Users = () => {
                     name="employee_id"
                     value={formData.employee_id}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
               </div>
@@ -509,7 +530,7 @@ const Users = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#1a365d] text-white px-4 py-2 rounded-lg hover:bg-[#2c5282] transition font-medium disabled:opacity-50"
                 >
                   {loading
                     ? isEditMode
