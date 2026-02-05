@@ -16,14 +16,31 @@ export interface UserData {
   employee_id?: string | null;
 }
 
+export interface PaginationMeta {
+  total: number;
+  last_page: number;
+  current_page: number;
+  per_page: number;
+}
+
 interface UsersState {
   users: UserData[];
   loading: boolean;
   error: string | null;
   currentUser: UserData | null;
+  pagination: PaginationMeta | null;
 
-  // Fetch all users
-  fetchUsers: () => Promise<void>;
+  // Fetch all users with pagination
+  fetchUsers: (
+    page?: number,
+    perPage?: number,
+    filters?: {
+      search?: string;
+      role?: string;
+      student_id?: string;
+      employee_id?: string;
+    },
+  ) => Promise<void>;
 
   // Fetch users by role
   fetchUsersByRole: (role: string) => Promise<void>;
@@ -73,6 +90,7 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
   loading: false,
   error: null,
   currentUser: null,
+  pagination: null,
 
   // Check if current user can add a specific role
   canAddRole: (currentUserRole: string, targetRole: string): boolean => {
@@ -98,32 +116,52 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
     return false;
   },
 
-  fetchUsers: async () => {
+  fetchUsers: async (page = 1, perPage = 10, filters = {}) => {
     set({ loading: true, error: null });
 
     try {
       const token = localStorage.getItem("token");
+
+      // Build query parameters
+      const params: any = {
+        page,
+        per_page: perPage,
+      };
+
+      // Add filters if provided
+      if (filters.search) params.search = filters.search;
+      if (filters.role && filters.role !== "all") params.role = filters.role;
+      if (filters.student_id) params.student_id = filters.student_id;
+      if (filters.employee_id) params.employee_id = filters.employee_id;
+
       const res = await axios.get(UserApi.fetchUsers, {
+        params,
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Handle nested response structure
+      // Handle paginated response structure
       const usersData = res.data.data || res.data.results || res.data;
+      const meta = res.data.meta;
 
       // Filter out deleted users
       const activeUsers = Array.isArray(usersData)
         ? usersData.filter((user: UserData) => !user.is_deleted)
         : [];
 
-      set({ users: activeUsers, loading: false });
+      set({
+        users: activeUsers,
+        pagination: meta || null,
+        loading: false,
+      });
     } catch (err: any) {
       console.error("Fetch Users Error:", err.response?.data);
       set({
         error: err.response?.data?.detail || "Failed to fetch users",
         loading: false,
         users: [],
+        pagination: null,
       });
     }
   },
