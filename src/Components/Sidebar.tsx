@@ -29,30 +29,10 @@ const Sidebar = ({
       hideForRoles: ["student"], // Hide for students
     },
     {
-      name: "classes",
+      name: "Classes",
       path: "/classes",
       icon: <FileText className="w-5 h-5" />,
     },
-    // {
-    //   name: "Profile",
-    //   path: "/profile",
-    //   icon: <User className="w-5 h-5" />,
-    // },
-    // {
-    //   name: "Settings",
-    //   path: "/settings",
-    //   icon: <Settings className="w-5 h-5" />,
-    // },
-    // {
-    //   name: "Analytics",
-    //   path: "/analytics",
-    //   icon: <BarChart3 className="w-5 h-5" />,
-    // },
-    // {
-    //   name: "Reports",
-    //   path: "/reports",
-    //   icon: <FileText className="w-5 h-5" />,
-    // },
   ];
 
   // Filter menu items based on user role
@@ -65,25 +45,25 @@ const Sidebar = ({
 
   return (
     <div
-      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white/95 backdrop-blur-md shadow-xl transition-all duration-300 ease-in-out ${
-        isCollapsed ? "w-16" : "w-64"
-      } border-r border-gray-200 z-30`}
+      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-sm transition-all duration-300 ease-in-out ${
+        isCollapsed ? "w-20" : "w-64"
+      } border-r border-gray-200 z-30 overflow-hidden`}
     >
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 border-b border-gray-100 bg-gray-50">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <h2 className="text-lg font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-              Menu
-            </h2>
+            <h2 className="text-base font-bold text-[#1a365d]">Navigation</h2>
           )}
           <button
             onClick={onToggleCollapse}
-            className="p-2.5 rounded-xl hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 transition-all duration-200 border border-gray-200 hover:border-emerald-300 group"
+            className={`p-2 rounded-lg hover:bg-white transition-all duration-200 border border-gray-200 hover:border-[#1a365d] ${
+              isCollapsed ? "mx-auto" : ""
+            }`}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
-              className={`w-4 h-4 text-gray-600 group-hover:text-emerald-600 transition-all duration-300 ${
+              className={`w-4 h-4 text-gray-600 hover:text-[#1a365d] transition-all duration-300 ${
                 isCollapsed ? "rotate-180" : ""
               }`}
               fill="none"
@@ -102,8 +82,8 @@ const Sidebar = ({
       </div>
 
       {/* Navigation Menu */}
-      <nav className="p-4 overflow-y-auto h-[calc(100%-5rem)]">
-        <ul className="space-y-2">
+      <nav className="p-3 overflow-y-auto h-[calc(100%-5rem)]">
+        <ul className="space-y-1.5">
           {filteredMenuItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -111,34 +91,33 @@ const Sidebar = ({
                 <Link
                   to={item.path}
                   onClick={onItemClick}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm"
-                      : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:shadow-sm hover:border hover:border-gray-200"
-                  }`}
-                  title={isCollapsed ? item.name : ""}
+                      ? "bg-[#1a365d] text-white shadow-md"
+                      : "text-gray-700 hover:bg-gray-50"
+                  } ${isCollapsed ? "justify-center" : ""}`}
                 >
                   <span
-                    className={`transition-colors duration-200 ${
-                      isActive
-                        ? "text-emerald-600"
-                        : "text-gray-500 group-hover:text-gray-700"
+                    className={`transition-all duration-200 ${
+                      isActive ? "text-white" : "text-gray-500"
                     }`}
                   >
                     {item.icon}
                   </span>
                   {!isCollapsed && (
-                    <span className="font-medium transition-all duration-200">
-                      {item.name}
-                    </span>
-                  )}
-
-                  {/* Tooltip for collapsed state */}
-                  {isCollapsed && (
-                    <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                      {item.name}
-                      <div className="absolute top-1/2 -left-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                    </div>
+                    <>
+                      <span
+                        className={`font-medium transition-all duration-200 ${
+                          isActive ? "text-white" : "text-gray-700"
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      {/* Active Indicator */}
+                      {isActive && (
+                        <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                      )}
+                    </>
                   )}
                 </Link>
               </li>
@@ -150,9 +129,12 @@ const Sidebar = ({
       {/* Bottom Section */}
       {!isCollapsed && (
         <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-3 border border-emerald-200">
-            <p className="text-xs text-emerald-700 text-center font-medium">
-              Grace Dashboard v1.0
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <p className="text-xs text-[#1a365d] text-center font-semibold">
+              Grace International
+            </p>
+            <p className="text-xs text-gray-500 text-center mt-0.5">
+              Version 1.0.0
             </p>
           </div>
         </div>

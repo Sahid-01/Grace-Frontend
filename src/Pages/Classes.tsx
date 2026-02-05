@@ -15,6 +15,7 @@ import {
   List,
   FileText,
   PlayCircle,
+  GraduationCap,
 } from "lucide-react";
 
 const Class = () => {
@@ -94,7 +95,6 @@ const Class = () => {
     }
   }, []);
 
-  // Close video modal on ESC key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isVideoModalOpen) {
@@ -168,7 +168,6 @@ const Class = () => {
   const handleLessonSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Prepare lesson data with file if present
     const lessonData: LessonFormData = {
       title: lessonFormData.title,
       content: lessonFormData.content,
@@ -177,7 +176,6 @@ const Class = () => {
       is_active: lessonFormData.is_active,
     };
 
-    // Add file if selected
     if (lessonFormData.file) {
       lessonData.file = lessonFormData.file;
     }
@@ -289,12 +287,9 @@ const Class = () => {
   };
 
   const handleLessonClick = (lesson: any) => {
-    // Fix URL if it doesn't have /media/ prefix
     if (lesson.file_url && !lesson.file_url.includes("/media/")) {
       const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      // Remove trailing slash from baseUrl
       const cleanBaseUrl = baseUrl.replace(/\/$/, "");
-      // Ensure file path starts with /
       const filePath = lesson.file.startsWith("/")
         ? lesson.file
         : `/${lesson.file}`;
@@ -314,8 +309,14 @@ const Class = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading courses...</p>
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-[#1a365d] border-r-[#2c5282] animate-spin"></div>
+          </div>
+          <p className="text-gray-700 font-semibold text-lg">
+            Loading courses...
+          </p>
+          <p className="text-gray-500 text-sm mt-2">Please wait a moment</p>
         </div>
       </div>
     );
@@ -324,11 +325,13 @@ const Class = () => {
   // Student View - Learning Interface
   if (isStudent) {
     return (
-      <div className="space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 sm:p-8 text-white">
+        <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8" />
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              <GraduationCap className="w-7 h-7" />
+            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold">My Courses</h1>
               <p className="text-blue-100 mt-1">
@@ -357,13 +360,15 @@ const Class = () => {
               return (
                 <div
                   key={course.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200"
                 >
                   {/* Course Card Header */}
-                  <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                  <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] p-6 text-white">
                     <div className="flex items-start justify-between mb-3">
-                      <BookOpen className="w-8 h-8" />
-                      <span className="text-xs bg-white/20 px-3 py-1 rounded-full">
+                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <span className="text-xs bg-white/20 px-3 py-1 rounded-full font-semibold">
                         {course.course_type}
                       </span>
                     </div>
@@ -440,7 +445,7 @@ const Class = () => {
                                       onClick={() => handleLessonClick(lesson)}
                                       className="flex items-center gap-2 p-2 hover:bg-blue-50 rounded transition cursor-pointer"
                                     >
-                                      <PlayCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                      <PlayCircle className="w-4 h-4 text-[#1a365d] flex-shrink-0" />
                                       <span className="text-sm text-gray-700 flex-1">
                                         {lesson.title}
                                       </span>
@@ -467,7 +472,7 @@ const Class = () => {
 
                   {/* Course Action */}
                   <div className="p-4 bg-gray-50 border-t border-gray-200">
-                    <button className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+                    <button className="w-full bg-[#1a365d] text-white py-2 rounded-lg hover:bg-[#2c5282] transition font-medium text-sm">
                       Continue Learning
                     </button>
                   </div>
@@ -477,10 +482,14 @@ const Class = () => {
         </div>
 
         {courses.filter((c) => c.is_active).length === 0 && !coursesLoading && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No courses available</p>
-            <p className="text-gray-400 text-sm mt-2">
+          <div className="bg-white rounded-lg shadow-sm p-16 text-center border border-gray-200">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <BookOpen className="w-12 h-12 text-gray-400" />
+            </div>
+            <p className="text-gray-600 text-xl font-semibold mb-2">
+              No courses available
+            </p>
+            <p className="text-gray-400 text-sm">
               Check back later for new courses
             </p>
           </div>
@@ -489,27 +498,19 @@ const Class = () => {
         {/* Video Player Modal */}
         {isVideoModalOpen && selectedLesson && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4"
             onClick={(e) => {
-              // Close modal when clicking on backdrop
               if (e.target === e.currentTarget) {
                 closeVideoModal();
               }
             }}
           >
             <div className="w-full max-w-6xl">
-              {/* Close Button */}
               <div className="flex items-center justify-between mb-4">
                 <div className="text-white">
                   <h2 className="text-xl font-bold">{selectedLesson.title}</h2>
                   <p className="text-sm text-gray-300">
                     Lesson {selectedLesson.order}
-                  </p>
-                  {/* Debug Info */}
-                  <p className="text-xs text-gray-400 mt-1">
-                    File: {selectedLesson.file || "No file"} | URL:{" "}
-                    {selectedLesson.file_url ? "Available" : "Missing"} | Type:{" "}
-                    {selectedLesson.file_type || "Unknown"}
                   </p>
                 </div>
                 <button
@@ -521,7 +522,6 @@ const Class = () => {
                 </button>
               </div>
 
-              {/* Video Player Only */}
               {selectedLesson.file_url ? (
                 <div className="bg-black rounded-lg overflow-hidden shadow-2xl">
                   <video
@@ -529,13 +529,6 @@ const Class = () => {
                     className="w-full"
                     autoPlay
                     preload="metadata"
-                    onError={(e) => {
-                      console.error("Video Error:", e);
-                      console.error("Video URL:", selectedLesson.file_url);
-                      console.error("Video Type:", selectedLesson.file_type);
-                    }}
-                    onLoadStart={() => {}}
-                    onCanPlay={() => {}}
                   >
                     <source
                       src={selectedLesson.file_url}
@@ -554,15 +547,9 @@ const Class = () => {
                   <p className="text-gray-300 mb-2">
                     No video available for this lesson
                   </p>
-                  <div className="text-xs text-gray-500 mt-4">
-                    <p>File: {selectedLesson.file || "Not uploaded"}</p>
-                    <p>
-                      File URL: {selectedLesson.file_url || "Not generated"}
-                    </p>
-                  </div>
                   <button
                     onClick={closeVideoModal}
-                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="mt-4 px-6 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition"
                   >
                     Close
                   </button>
@@ -577,17 +564,19 @@ const Class = () => {
 
   // Teacher/Admin View - Management Interface
   return (
-    <div className="space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 sm:p-8 text-white">
-        <div className="flex items-center justify-between">
+      <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8" />
+            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+              <BookOpen className="w-7 h-7" />
+            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold">
-                Courses Management
+                Course Management
               </h1>
-              <p className="text-emerald-100 mt-1">
+              <p className="text-blue-100 mt-1">
                 Manage courses, sections, and lessons
               </p>
             </div>
@@ -605,7 +594,7 @@ const Class = () => {
               clearCourseError();
               setIsCourseModalOpen(true);
             }}
-            className="flex items-center gap-2 bg-white text-emerald-600 px-4 py-2 rounded-lg hover:bg-emerald-50 transition font-medium"
+            className="flex items-center gap-2 bg-white text-[#1a365d] px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all font-semibold shadow-sm"
           >
             <Plus className="w-5 h-5" />
             Add Course
@@ -615,8 +604,13 @@ const Class = () => {
 
       {/* Error Message */}
       {coursesError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-700">{coursesError}</p>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <p className="text-red-700 font-semibold">{coursesError}</p>
+          </div>
         </div>
       )}
 
@@ -625,23 +619,25 @@ const Class = () => {
         {courses.map((course) => (
           <div
             key={course.id}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden"
+            className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-all duration-300"
           >
             {/* Course Header */}
-            <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 border-b border-emerald-200">
+            <div className="bg-gray-50 p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1">
                   <button
                     onClick={() => toggleCourse(course.id)}
-                    className="p-1 hover:bg-emerald-200 rounded transition"
+                    className="p-1.5 hover:bg-gray-200 rounded-lg transition"
                   >
                     {expandedCourses.has(course.id) ? (
-                      <ChevronDown className="w-5 h-5 text-emerald-700" />
+                      <ChevronDown className="w-5 h-5 text-gray-700" />
                     ) : (
-                      <ChevronRight className="w-5 h-5 text-emerald-700" />
+                      <ChevronRight className="w-5 h-5 text-gray-700" />
                     )}
                   </button>
-                  <BookOpen className="w-6 h-6 text-emerald-600" />
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#1a365d] to-[#2c5282] rounded-lg flex items-center justify-center shadow-sm">
+                    <BookOpen className="w-5 h-5 text-white" />
+                  </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-gray-800">
                       {course.title}
@@ -652,11 +648,11 @@ const Class = () => {
                       </p>
                     )}
                     <div className="flex gap-3 mt-2">
-                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                      <span className="text-xs bg-blue-50 text-[#1a365d] px-2.5 py-1 rounded-full font-semibold">
                         {course.course_type}
                       </span>
                       <span
-                        className={`text-xs px-2 py-1 rounded ${course.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                        className={`text-xs px-2.5 py-1 rounded-full font-semibold ${course.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700"}`}
                       >
                         {course.is_active ? "Active" : "Inactive"}
                       </span>
@@ -666,20 +662,20 @@ const Class = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleAddSection(course.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition"
+                    className="flex items-center gap-1 px-3 py-2 bg-[#2c5282] text-white text-sm rounded-lg hover:bg-[#1a365d] transition-all shadow-sm font-semibold"
                   >
                     <Plus className="w-4 h-4" />
                     Section
                   </button>
                   <button
                     onClick={() => handleEditCourse(course)}
-                    className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition"
+                    className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteCourse(course.id)}
-                    className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                    className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -721,7 +717,7 @@ const Class = () => {
                                 {section.name}
                               </h4>
                               <span
-                                className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${section.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                                className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${section.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700"}`}
                               >
                                 {section.is_active ? "Active" : "Inactive"}
                               </span>
@@ -730,7 +726,7 @@ const Class = () => {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleAddLesson(section.id)}
-                              className="flex items-center gap-1 px-2 py-1 bg-purple-500 text-white text-xs rounded hover:bg-purple-600 transition"
+                              className="flex items-center gap-1 px-2 py-1 bg-[#c41e3a] text-white text-xs rounded hover:bg-[#a01629] transition"
                             >
                               <Plus className="w-3 h-3" />
                               Lesson
@@ -763,7 +759,7 @@ const Class = () => {
                             getSectionLessons(section.id).map((lesson) => (
                               <div
                                 key={lesson.id}
-                                className="bg-white p-3 rounded border border-gray-200 hover:border-emerald-300 transition"
+                                className="bg-white p-3 rounded border border-gray-200 hover:border-[#1a365d] transition"
                               >
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-start gap-2 flex-1">
@@ -782,12 +778,12 @@ const Class = () => {
                                           Order: {lesson.order}
                                         </span>
                                         {lesson.file_url && (
-                                          <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
+                                          <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">
                                             Video: .{lesson.file_type || "file"}
                                           </span>
                                         )}
                                         <span
-                                          className={`text-xs px-2 py-0.5 rounded ${lesson.is_active ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                                          className={`text-xs px-2 py-0.5 rounded ${lesson.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700"}`}
                                         >
                                           {lesson.is_active
                                             ? "Active"
@@ -827,20 +823,42 @@ const Class = () => {
         ))}
 
         {courses.length === 0 && !coursesLoading && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No courses found</p>
-            <p className="text-gray-400 text-sm mt-2">
+          <div className="bg-white rounded-lg shadow-sm p-16 text-center border border-gray-200">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <BookOpen className="w-12 h-12 text-gray-400" />
+            </div>
+            <p className="text-gray-600 text-xl font-semibold mb-2">
+              No courses found
+            </p>
+            <p className="text-gray-400 text-sm mb-6">
               Click "Add Course" to create your first course
             </p>
+            <button
+              onClick={() => {
+                setIsEditMode(false);
+                setEditingId(null);
+                setCourseFormData({
+                  title: "",
+                  description: "",
+                  course_type: "IELTS",
+                  is_active: true,
+                });
+                clearCourseError();
+                setIsCourseModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-all shadow-sm font-semibold"
+            >
+              <Plus className="w-5 h-5" />
+              Add First Course
+            </button>
           </div>
         )}
       </div>
 
       {/* Course Modal */}
       {isCourseModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-800">
                 {isEditMode ? "Edit Course" : "Add New Course"}
@@ -868,7 +886,7 @@ const Class = () => {
                     })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 />
               </div>
 
@@ -886,7 +904,7 @@ const Class = () => {
                   }
                   required
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 />
               </div>
 
@@ -904,7 +922,7 @@ const Class = () => {
                       })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   >
                     <option value="IELTS">IELTS</option>
                     <option value="PTE">PTE</option>
@@ -923,7 +941,7 @@ const Class = () => {
                         is_active: e.target.value === "active",
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -941,7 +959,7 @@ const Class = () => {
                 <button
                   type="submit"
                   disabled={coursesLoading}
-                  className="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#1a365d] text-white px-4 py-2 rounded-lg hover:bg-[#2c5282] transition font-medium disabled:opacity-50"
                 >
                   {coursesLoading
                     ? isEditMode
@@ -966,8 +984,8 @@ const Class = () => {
 
       {/* Section Modal */}
       {isSectionModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-800">
                 {isEditMode ? "Edit Section" : "Add New Section"}
@@ -1002,7 +1020,7 @@ const Class = () => {
                     })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 >
                   <option value="listening">Listening</option>
                   <option value="reading">Reading</option>
@@ -1023,7 +1041,7 @@ const Class = () => {
                       is_active: e.target.value === "active",
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -1034,7 +1052,7 @@ const Class = () => {
                 <button
                   type="submit"
                   disabled={sectionsLoading}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#2c5282] text-white px-4 py-2 rounded-lg hover:bg-[#1a365d] transition font-medium disabled:opacity-50"
                 >
                   {sectionsLoading
                     ? isEditMode
@@ -1063,8 +1081,8 @@ const Class = () => {
 
       {/* Lesson Modal */}
       {isLessonModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-800">
                 {isEditMode ? "Edit Lesson" : "Add New Lesson"}
@@ -1096,7 +1114,7 @@ const Class = () => {
                     })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 />
               </div>
 
@@ -1114,7 +1132,7 @@ const Class = () => {
                   }
                   required
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 />
               </div>
 
@@ -1134,7 +1152,7 @@ const Class = () => {
                     }
                     required
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   />
                 </div>
 
@@ -1150,7 +1168,7 @@ const Class = () => {
                         is_active: e.target.value === "active",
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -1171,7 +1189,7 @@ const Class = () => {
                       file: e.target.files?.[0] || null,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Accepted formats: MP4, AVI, MOV, WMV, FLV, MKV, WebM
@@ -1182,7 +1200,7 @@ const Class = () => {
                 <button
                   type="submit"
                   disabled={lessonsLoading}
-                  className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#c41e3a] text-white px-4 py-2 rounded-lg hover:bg-[#a01629] transition font-medium disabled:opacity-50"
                 >
                   {lessonsLoading
                     ? isEditMode
