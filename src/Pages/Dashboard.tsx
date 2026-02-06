@@ -1,14 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/auth";
-import { useUsersStore } from "@/stores/Users";
-import { useCoursesStore } from "@/stores/Course";
-import { useSectionsStore } from "@/stores/Sections";
-import { useLessonsStore } from "@/stores/Lessions";
+import { useAuthStore } from "@/stores/Auth/auth";
+import { useUsersStore } from "@/stores/Auth/Users";
+import { useCoursesStore } from "@/stores/Classes/Course";
+import { useSectionsStore } from "@/stores/Classes/Sections";
+import { useLessonsStore } from "@/stores/Classes/Lessions";
 import { Users, BookOpen, GraduationCap, Award } from "lucide-react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const hasFetched = useRef(false);
   const { user, isAuthenticated, loading, error, logout, self, clearError } =
     useAuthStore();
   const { users, fetchUsers } = useUsersStore();
@@ -39,14 +40,17 @@ const Dashboard = () => {
     fetchUserData();
   }, [isAuthenticated, user]);
 
-  // Fetch stats data
+  // Fetch stats data - only once
   useEffect(() => {
-    if (user && user.role !== "student") {
-      fetchUsers();
+    if (!hasFetched.current && user) {
+      if (user.role !== "student") {
+        fetchUsers();
+      }
+      fetchCourses();
+      fetchSections();
+      fetchLessons();
+      hasFetched.current = true;
     }
-    fetchCourses();
-    fetchSections();
-    fetchLessons();
   }, [user]);
 
   // Calculate stats

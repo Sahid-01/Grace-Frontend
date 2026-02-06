@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { LessonApi } from "@/Endpoints/Lessions";
+import { LessonApi } from "@/Endpoints/Classes/Lessions";
 
 export interface LessonData {
   id: number;
@@ -10,6 +10,8 @@ export interface LessonData {
   file?: string | null; // File path from backend
   file_url?: string | null; // Full URL from backend
   file_type?: string | null; // File extension (mp4, avi, etc.)
+  video_url?: string | null; // Direct video URL
+  pdf_url?: string | null; // PDF link
   order: number;
   is_active: boolean;
   created_at?: string;
@@ -25,6 +27,8 @@ export interface LessonFormData extends Omit<
   "file" | "file_url" | "file_type"
 > {
   file?: File | string | null; // Can be File object for upload or string path from API
+  video_url?: string; // Direct video URL
+  pdf_url?: string; // PDF link
 }
 
 interface LessonsState {
@@ -146,7 +150,7 @@ export const useLessonsStore = create<LessonsState>()((set) => ({
 
       // Check if we need to use FormData (for file uploads)
       const hasFile = lessonData.file && typeof lessonData.file !== "string";
-      let requestData: any = lessonData;
+      let requestData: any;
       let headers: any = {
         Authorization: `Bearer ${token}`,
       };
@@ -162,6 +166,15 @@ export const useLessonsStore = create<LessonsState>()((set) => ({
         });
         requestData = formData;
         headers["Content-Type"] = "multipart/form-data";
+      } else {
+        // For non-file creates, send clean JSON
+        requestData = {};
+        Object.keys(lessonData).forEach((key) => {
+          const value = lessonData[key as keyof typeof lessonData];
+          if (value !== null && value !== undefined) {
+            requestData[key] = value;
+          }
+        });
       }
 
       const res = await axios.post(LessonApi.createLesson, requestData, {
@@ -194,7 +207,7 @@ export const useLessonsStore = create<LessonsState>()((set) => ({
 
       // Check if we need to use FormData (for file uploads)
       const hasFile = lessonData.file && typeof lessonData.file !== "string";
-      let requestData: any = lessonData;
+      let requestData: any;
       let headers: any = {
         Authorization: `Bearer ${token}`,
       };
@@ -210,6 +223,15 @@ export const useLessonsStore = create<LessonsState>()((set) => ({
         });
         requestData = formData;
         headers["Content-Type"] = "multipart/form-data";
+      } else {
+        // For non-file updates, send clean JSON
+        requestData = {};
+        Object.keys(lessonData).forEach((key) => {
+          const value = lessonData[key as keyof typeof lessonData];
+          if (value !== null && value !== undefined) {
+            requestData[key] = value;
+          }
+        });
       }
 
       const res = await axios.put(LessonApi.updateLesson(id), requestData, {
@@ -243,7 +265,7 @@ export const useLessonsStore = create<LessonsState>()((set) => ({
 
       // Check if we need to use FormData (for file uploads)
       const hasFile = lessonData.file && typeof lessonData.file !== "string";
-      let requestData: any = lessonData;
+      let requestData: any;
       let headers: any = {
         Authorization: `Bearer ${token}`,
       };
@@ -259,6 +281,15 @@ export const useLessonsStore = create<LessonsState>()((set) => ({
         });
         requestData = formData;
         headers["Content-Type"] = "multipart/form-data";
+      } else {
+        // For non-file updates, send clean JSON
+        requestData = {};
+        Object.keys(lessonData).forEach((key) => {
+          const value = lessonData[key as keyof typeof lessonData];
+          if (value !== null && value !== undefined) {
+            requestData[key] = value;
+          }
+        });
       }
 
       const res = await axios.patch(LessonApi.patchLesson(id), requestData, {

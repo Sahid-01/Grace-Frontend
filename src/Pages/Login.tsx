@@ -7,7 +7,7 @@ import {
   CheckCircle2,
   GraduationCap,
 } from "lucide-react";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/Auth/auth";
 
 interface LoginErrors {
   username?: string;

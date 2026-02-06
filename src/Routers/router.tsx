@@ -3,9 +3,15 @@ import Login from "@/Pages/Login";
 import Dashboard from "@/Pages/Dashboard";
 import Users from "@/Pages/Users";
 import Class from "@/Pages/Classes";
+import Tests from "@/Pages/Tests";
+import TestAssignments from "@/Pages/TestAssignments";
+import TestMarking from "@/Pages/TestMarking";
+import TestSections from "@/Pages/TestSections";
+import Questions from "@/Pages/Questions";
+import QuestionOptions from "@/Pages/QuestionOptions";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import type { ReactElement } from "react";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/Auth/auth";
 
 // Protected Route Component
 const ProtectedRoute = ({ element }: { element: ReactElement }) => {
@@ -40,6 +46,30 @@ const router = createBrowserRouter([
       {
         path: "classes",
         element: <ProtectedRoute element={<Class />} />,
+      },
+      {
+        path: "tests",
+        element: <ProtectedRoute element={<Tests />} />,
+      },
+      {
+        path: "test-assignments",
+        element: <ProtectedRoute element={<TestAssignments />} />,
+      },
+      {
+        path: "test-marking",
+        element: <ProtectedRoute element={<TestMarking />} />,
+      },
+      {
+        path: "test-sections",
+        element: <ProtectedRoute element={<TestSections />} />,
+      },
+      {
+        path: "questions",
+        element: <ProtectedRoute element={<Questions />} />,
+      },
+      {
+        path: "question-options",
+        element: <ProtectedRoute element={<QuestionOptions />} />,
       },
     ],
   },

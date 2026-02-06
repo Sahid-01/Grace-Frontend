@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { CourseApi } from "@/Endpoints/Course";
+import { CourseApi } from "@/Endpoints/Classes/Course";
 
 export interface CourseData {
   id: number;

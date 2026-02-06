@@ -1,6 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FileText, Users } from "lucide-react";
-import { useAuthStore } from "@/stores/auth";
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  BookOpen,
+  ClipboardList,
+  Award,
+  HelpCircle,
+  List,
+} from "lucide-react";
+import { useAuthStore } from "@/stores/Auth/auth";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -32,6 +41,42 @@ const Sidebar = ({
       name: "Classes",
       path: "/classes",
       icon: <FileText className="w-5 h-5" />,
+    },
+    {
+      name: "Tests",
+      path: "/tests",
+      icon: <BookOpen className="w-5 h-5" />,
+      hideForRoles: ["student"],
+    },
+    {
+      name: "Assignments",
+      path: "/test-assignments",
+      icon: <ClipboardList className="w-5 h-5" />,
+      hideForRoles: ["student"],
+    },
+    {
+      name: "Marking",
+      path: "/test-marking",
+      icon: <Award className="w-5 h-5" />,
+      hideForRoles: ["student"],
+    },
+    {
+      name: "Sections",
+      path: "/test-sections",
+      icon: <BookOpen className="w-5 h-5" />,
+      hideForRoles: ["student"],
+    },
+    {
+      name: "Questions",
+      path: "/questions",
+      icon: <HelpCircle className="w-5 h-5" />,
+      hideForRoles: ["student"],
+    },
+    {
+      name: "Options",
+      path: "/question-options",
+      icon: <List className="w-5 h-5" />,
+      hideForRoles: ["student"],
     },
   ];
 
