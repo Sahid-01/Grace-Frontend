@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
-import { useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/Auth/auth";
 import router from "@/Routers/router";
 import axios from "axios";
 

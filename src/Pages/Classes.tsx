@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from "react";
-import { useCoursesStore } from "@/stores/Course";
-import { useSectionsStore } from "@/stores/Sections";
-import { useLessonsStore } from "@/stores/Lessions";
-import type { LessonFormData } from "@/stores/Lessions";
-import { useAuthStore } from "@/stores/auth";
+import { useEffect, useState } from "react";
+import { useCoursesStore } from "@/stores/Classes/Course";
+import { useSectionsStore } from "@/stores/Classes/Sections";
+import { useLessonsStore } from "@/stores/Classes/Lessions";
+import { useLessonProgressStore } from "@/stores/Classes/LessonProgress";
+import type { LessonFormData } from "@/stores/Classes/Lessions";
+import { useAuthStore } from "@/stores/Auth/auth";
 import {
   BookOpen,
   Plus,
@@ -46,6 +47,7 @@ const Class = () => {
     updateLesson,
     deleteLesson,
   } = useLessonsStore();
+  const { progress, fetchProgress } = useLessonProgressStore();
 
   const isStudent = user?.role === "student" || user?.student_id;
 
@@ -62,7 +64,8 @@ const Class = () => {
   );
   const [selectedLesson, setSelectedLesson] = useState<any>(null);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const hasFetched = useRef(false);
+  const [isIntroModalOpen, setIsIntroModalOpen] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const [courseFormData, setCourseFormData] = useState({
     title: "",
@@ -83,15 +86,18 @@ const Class = () => {
     section: 0,
     order: 1,
     file: null as File | null,
+    video_url: "",
+    pdf_url: "",
     is_active: true,
   });
 
   useEffect(() => {
-    if (!hasFetched.current) {
+    if (!hasFetched) {
       fetchCourses();
       fetchSections();
       fetchLessons();
-      hasFetched.current = true;
+      fetchProgress();
+      setHasFetched(true);
     }
   }, []);
 
@@ -180,6 +186,14 @@ const Class = () => {
       lessonData.file = lessonFormData.file;
     }
 
+    if (lessonFormData.video_url) {
+      lessonData.video_url = lessonFormData.video_url;
+    }
+
+    if (lessonFormData.pdf_url) {
+      lessonData.pdf_url = lessonFormData.pdf_url;
+    }
+
     if (isEditMode && editingId) {
       await updateLesson(editingId, lessonData);
     } else {
@@ -192,6 +206,8 @@ const Class = () => {
       section: 0,
       order: 1,
       file: null,
+      video_url: "",
+      pdf_url: "",
       is_active: true,
     });
     setIsEditMode(false);
@@ -251,7 +267,18 @@ const Class = () => {
   };
 
   const handleAddLesson = (sectionId: number) => {
-    setLessonFormData({ ...lessonFormData, section: sectionId });
+    setIsEditMode(false);
+    setEditingId(null);
+    setLessonFormData({
+      title: "",
+      content: "",
+      section: sectionId,
+      order: 1,
+      file: null,
+      video_url: "",
+      pdf_url: "",
+      is_active: true,
+    });
     setIsLessonModalOpen(true);
   };
 
@@ -264,6 +291,8 @@ const Class = () => {
       section: lesson.section,
       order: lesson.order || 1,
       file: null,
+      video_url: lesson.video_url || "",
+      pdf_url: lesson.pdf_url || "",
       is_active: lesson.is_active ?? true,
     });
     setIsLessonModalOpen(true);
@@ -286,23 +315,33 @@ const Class = () => {
       .sort((a, b) => a.order - b.order);
   };
 
-  const handleLessonClick = (lesson: any) => {
-    if (lesson.file_url && !lesson.file_url.includes("/media/")) {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-      const cleanBaseUrl = baseUrl.replace(/\/$/, "");
-      const filePath = lesson.file.startsWith("/")
-        ? lesson.file
-        : `/${lesson.file}`;
-      lesson.file_url = `${cleanBaseUrl}/media${filePath}`;
-    }
-
-    setSelectedLesson(lesson);
-    setIsVideoModalOpen(true);
-  };
-
   const closeVideoModal = () => {
+    // Mark lesson as completed when closing video
+    if (selectedLesson) {
+      const { updateProgress } = useLessonProgressStore.getState();
+      updateProgress(selectedLesson.id, 100, true); // Mark as 100% and completed
+    }
     setIsVideoModalOpen(false);
     setSelectedLesson(null);
+  };
+
+  const handleLessonIntroClick = (lesson: any) => {
+    setSelectedLesson(lesson);
+    setIsIntroModalOpen(true);
+  };
+
+  const closeIntroModal = () => {
+    setIsIntroModalOpen(false);
+    setSelectedLesson(null);
+  };
+
+  const handleStartVideo = async () => {
+    if (selectedLesson) {
+      const { updateProgress } = useLessonProgressStore.getState();
+      await updateProgress(selectedLesson.id, 50, false); // Mark as 50% progress when starting
+    }
+    setIsIntroModalOpen(false);
+    setIsVideoModalOpen(true);
   };
 
   if (coursesLoading && courses.length === 0) {
@@ -439,28 +478,56 @@ const Class = () => {
                                     No lessons available
                                   </p>
                                 ) : (
-                                  sectionLessons.map((lesson) => (
-                                    <div
-                                      key={lesson.id}
-                                      onClick={() => handleLessonClick(lesson)}
-                                      className="flex items-center gap-2 p-2 hover:bg-blue-50 rounded transition cursor-pointer"
-                                    >
-                                      <PlayCircle className="w-4 h-4 text-[#1a365d] flex-shrink-0" />
-                                      <span className="text-sm text-gray-700 flex-1">
-                                        {lesson.title}
-                                      </span>
-                                      {lesson.file_url && (
-                                        <div className="flex items-center gap-1">
-                                          <FileText className="w-3 h-3 text-gray-400" />
-                                          {lesson.file_type && (
-                                            <span className="text-xs text-gray-500">
-                                              .{lesson.file_type}
-                                            </span>
-                                          )}
+                                  sectionLessons.map((lesson) => {
+                                    const lessonProgress = progress[lesson.id];
+                                    return (
+                                      <div
+                                        key={lesson.id}
+                                        onClick={() =>
+                                          handleLessonIntroClick(lesson)
+                                        }
+                                        className="flex items-center gap-2 p-2 hover:bg-blue-50 rounded transition cursor-pointer group"
+                                      >
+                                        <PlayCircle className="w-4 h-4 text-[#1a365d] flex-shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                          <span className="text-sm text-gray-700 block truncate">
+                                            {lesson.title}
+                                          </span>
+                                          {lessonProgress &&
+                                            lessonProgress.progress_percentage >
+                                              0 && (
+                                              <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                                                <div
+                                                  className={`h-full transition-all ${
+                                                    lessonProgress.is_completed
+                                                      ? "bg-green-500"
+                                                      : "bg-blue-500"
+                                                  }`}
+                                                  style={{
+                                                    width: `${lessonProgress.progress_percentage}%`,
+                                                  }}
+                                                />
+                                              </div>
+                                            )}
                                         </div>
-                                      )}
-                                    </div>
-                                  ))
+                                        {lesson.file_url && (
+                                          <div className="flex items-center gap-1">
+                                            <FileText className="w-3 h-3 text-gray-400" />
+                                            {lesson.file_type && (
+                                              <span className="text-xs text-gray-500">
+                                                .{lesson.file_type}
+                                              </span>
+                                            )}
+                                          </div>
+                                        )}
+                                        {lessonProgress?.is_completed && (
+                                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                                            Done
+                                          </span>
+                                        )}
+                                      </div>
+                                    );
+                                  })
                                 )}
                               </div>
                             )}
@@ -472,9 +539,52 @@ const Class = () => {
 
                   {/* Course Action */}
                   <div className="p-4 bg-gray-50 border-t border-gray-200">
-                    <button className="w-full bg-[#1a365d] text-white py-2 rounded-lg hover:bg-[#2c5282] transition font-medium text-sm">
-                      Continue Learning
-                    </button>
+                    {(() => {
+                      const courseSections = sections.filter(
+                        (s) => s.course === course.id && s.is_active,
+                      );
+                      const courseLessons = courseSections.flatMap((section) =>
+                        lessons.filter(
+                          (l) => l.section === section.id && l.is_active,
+                        ),
+                      );
+                      const completedLessons = courseLessons.filter(
+                        (lesson) => progress[lesson.id]?.is_completed,
+                      ).length;
+                      const courseProgress =
+                        courseLessons.length > 0
+                          ? Math.round(
+                              (completedLessons / courseLessons.length) * 100,
+                            )
+                          : 0;
+
+                      return (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-600 font-medium">
+                              Progress: {completedLessons}/
+                              {courseLessons.length}
+                            </span>
+                            <span className="text-gray-700 font-semibold">
+                              {courseProgress}%
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-[#1a365d] to-[#2c5282] transition-all duration-300"
+                              style={{ width: `${courseProgress}%` }}
+                            />
+                          </div>
+                          <button className="w-full bg-[#1a365d] text-white py-2 rounded-lg hover:bg-[#2c5282] transition font-medium text-sm">
+                            {courseProgress === 100
+                              ? "Course Completed! 🎉"
+                              : courseProgress > 0
+                                ? "Continue Learning"
+                                : "Start Learning"}
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               );
@@ -492,6 +602,120 @@ const Class = () => {
             <p className="text-gray-400 text-sm">
               Check back later for new courses
             </p>
+          </div>
+        )}
+
+        {/* Intro Modal */}
+        {isIntroModalOpen && selectedLesson && (
+          <div
+            className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closeIntroModal();
+              }
+            }}
+          >
+            <div className="w-full max-w-2xl bg-white rounded-lg shadow-2xl overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] p-6 text-white flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">{selectedLesson.title}</h2>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Lesson {selectedLesson.order}
+                  </p>
+                </div>
+                <button
+                  onClick={closeIntroModal}
+                  className="p-2 hover:bg-white/10 rounded-lg transition"
+                  aria-label="Close intro"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-6">
+                {/* Topic/Content */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                    Topic Overview
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p className="text-gray-700 leading-relaxed">
+                      {selectedLesson.content}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Resources */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Resources
+                  </h3>
+                  <div className="space-y-2">
+                    {selectedLesson.video_url && (
+                      <button
+                        onClick={() => {
+                          window.open(selectedLesson.video_url, "_blank");
+                        }}
+                        className="w-full flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer"
+                      >
+                        <PlayCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium text-gray-800">
+                            Video Lecture
+                          </p>
+                          <p className="text-xs text-gray-600 truncate">
+                            {selectedLesson.video_url}
+                          </p>
+                        </div>
+                        <span className="text-xs text-blue-600 font-semibold whitespace-nowrap">
+                          Open →
+                        </span>
+                      </button>
+                    )}
+                    {selectedLesson.pdf_url && (
+                      <button
+                        onClick={() => {
+                          window.open(selectedLesson.pdf_url, "_blank");
+                        }}
+                        className="w-full flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition cursor-pointer"
+                      >
+                        <FileText className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <p className="text-sm font-medium text-gray-800">
+                            PDF Materials
+                          </p>
+                          <p className="text-xs text-gray-600 truncate">
+                            {selectedLesson.pdf_url}
+                          </p>
+                        </div>
+                        <span className="text-xs text-green-600 font-semibold whitespace-nowrap">
+                          Open →
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={handleStartVideo}
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#1a365d] text-white px-4 py-3 rounded-lg hover:bg-[#2c5282] transition font-semibold"
+                  >
+                    <PlayCircle className="w-5 h-5" />
+                    Start Video
+                  </button>
+                  <button
+                    onClick={closeIntroModal}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1193,6 +1417,48 @@ const Class = () => {
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Accepted formats: MP4, AVI, MOV, WMV, FLV, MKV, WebM
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Video URL (optional)
+                </label>
+                <input
+                  type="url"
+                  value={lessonFormData.video_url}
+                  onChange={(e) =>
+                    setLessonFormData({
+                      ...lessonFormData,
+                      video_url: e.target.value,
+                    })
+                  }
+                  placeholder="https://example.com/video"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Direct link to video (YouTube, Vimeo, etc.)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  PDF Link (optional)
+                </label>
+                <input
+                  type="url"
+                  value={lessonFormData.pdf_url}
+                  onChange={(e) =>
+                    setLessonFormData({
+                      ...lessonFormData,
+                      pdf_url: e.target.value,
+                    })
+                  }
+                  placeholder="https://example.com/materials.pdf"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Link to PDF materials or study guide
                 </p>
               </div>
 

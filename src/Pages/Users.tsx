@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import { useUsersStore } from "@/stores/Users";
-import { useAuthStore } from "@/stores/auth";
+import { useUsersStore } from "@/stores/Auth/Users";
+import { useAuthStore } from "@/stores/Auth/auth";
 import {
   Users as UsersIcon,
   Plus,
@@ -55,6 +55,11 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
+  // Temporary filter states (for input fields)
+  const [tempSearchQuery, setTempSearchQuery] = useState("");
+  const [tempEmployeeId, setTempEmployeeId] = useState("");
+  const [tempStudentId, setTempStudentId] = useState("");
+
   useEffect(() => {
     if (!hasFetched.current) {
       fetchUsers(currentPage, perPage);
@@ -62,25 +67,41 @@ const Users = () => {
     }
   }, []);
 
-  // Fetch users when filters or pagination changes
+  // Fetch when pagination or role filter changes
   useEffect(() => {
-    if (hasFetched.current) {
-      const filters = {
-        search: searchQuery,
-        role: roleFilter,
-        student_id: studentIdFilter,
-        employee_id: employeeIdFilter,
-      };
-      fetchUsers(currentPage, perPage, filters);
+    if (!hasFetched.current) return;
+
+    const filters = {
+      search: searchQuery,
+      role: roleFilter,
+      student_id: studentIdFilter,
+      employee_id: employeeIdFilter,
+    };
+    fetchUsers(currentPage, perPage, filters);
+  }, [currentPage, perPage, roleFilter]);
+
+  // Apply filters manually
+  const applyFilters = () => {
+    setSearchQuery(tempSearchQuery);
+    setEmployeeIdFilter(tempEmployeeId);
+    setStudentIdFilter(tempStudentId);
+    setCurrentPage(1); // Reset to first page
+
+    const filters = {
+      search: tempSearchQuery,
+      role: roleFilter,
+      student_id: tempStudentId,
+      employee_id: tempEmployeeId,
+    };
+    fetchUsers(1, perPage, filters);
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      applyFilters();
     }
-  }, [
-    currentPage,
-    perPage,
-    searchQuery,
-    roleFilter,
-    studentIdFilter,
-    employeeIdFilter,
-  ]);
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -232,7 +253,18 @@ const Users = () => {
     setRoleFilter("all");
     setEmployeeIdFilter("");
     setStudentIdFilter("");
+    setTempSearchQuery("");
+    setTempEmployeeId("");
+    setTempStudentId("");
     setCurrentPage(1);
+
+    const filters = {
+      search: "",
+      role: "all",
+      student_id: "",
+      employee_id: "",
+    };
+    fetchUsers(1, perPage, filters);
   };
 
   // Pagination handlers
@@ -365,15 +397,16 @@ const Users = () => {
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={tempSearchQuery}
+                onChange={(e) => setTempSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
               />
             </div>
@@ -397,8 +430,9 @@ const Users = () => {
               <input
                 type="text"
                 placeholder="Employee ID"
-                value={employeeIdFilter}
-                onChange={(e) => setEmployeeIdFilter(e.target.value)}
+                value={tempEmployeeId}
+                onChange={(e) => setTempEmployeeId(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
               />
             </div>
@@ -408,10 +442,22 @@ const Users = () => {
               <input
                 type="text"
                 placeholder="Student ID"
-                value={studentIdFilter}
-                onChange={(e) => setStudentIdFilter(e.target.value)}
+                value={tempStudentId}
+                onChange={(e) => setTempStudentId(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
               />
+            </div>
+
+            {/* Search Button */}
+            <div>
+              <button
+                onClick={applyFilters}
+                className="w-full px-3 py-2 text-sm bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-all font-medium flex items-center justify-center gap-2"
+              >
+                <Search className="w-4 h-4" />
+                Search
+              </button>
             </div>
           </div>
 

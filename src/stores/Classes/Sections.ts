@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import axios from "axios";
-import { SectionApi } from "@/Endpoints/sections";
+import { SectionApi } from "@/Endpoints/Classes/sections";
 
 export interface SectionData {
   id: number;
