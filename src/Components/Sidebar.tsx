@@ -1,14 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  FileText,
-  Users,
-  BookOpen,
-  ClipboardList,
-  Award,
-  HelpCircle,
-  List,
-} from "lucide-react";
+import { LayoutDashboard, FileText, Users } from "lucide-react";
 import { useAuthStore } from "@/stores/Auth/auth";
 
 interface SidebarProps {
@@ -42,42 +33,6 @@ const Sidebar = ({
       path: "/classes",
       icon: <FileText className="w-5 h-5" />,
     },
-    {
-      name: "Tests",
-      path: "/tests",
-      icon: <BookOpen className="w-5 h-5" />,
-      hideForRoles: ["student"],
-    },
-    {
-      name: "Assignments",
-      path: "/test-assignments",
-      icon: <ClipboardList className="w-5 h-5" />,
-      hideForRoles: ["student"],
-    },
-    {
-      name: "Marking",
-      path: "/test-marking",
-      icon: <Award className="w-5 h-5" />,
-      hideForRoles: ["student"],
-    },
-    {
-      name: "Sections",
-      path: "/test-sections",
-      icon: <BookOpen className="w-5 h-5" />,
-      hideForRoles: ["student"],
-    },
-    {
-      name: "Questions",
-      path: "/questions",
-      icon: <HelpCircle className="w-5 h-5" />,
-      hideForRoles: ["student"],
-    },
-    {
-      name: "Options",
-      path: "/question-options",
-      icon: <List className="w-5 h-5" />,
-      hideForRoles: ["student"],
-    },
   ];
 
   // Filter menu items based on user role
@@ -95,20 +50,20 @@ const Sidebar = ({
       } border-r border-gray-200 z-30 overflow-hidden`}
     >
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-100 bg-gray-50">
+      <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-[#1164A3]/5 to-[#1A9641]/5">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <h2 className="text-base font-bold text-[#1a365d]">Navigation</h2>
+            <h2 className="text-base font-bold text-[#1164A3]">Navigation</h2>
           )}
           <button
             onClick={onToggleCollapse}
-            className={`p-2 rounded-lg hover:bg-white transition-all duration-200 border border-gray-200 hover:border-[#1a365d] ${
+            className={`p-2 rounded-lg hover:bg-white transition-all duration-200 border border-gray-200 hover:border-[#1164A3] ${
               isCollapsed ? "mx-auto" : ""
             }`}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
-              className={`w-4 h-4 text-gray-600 hover:text-[#1a365d] transition-all duration-300 ${
+              className={`w-4 h-4 text-gray-600 hover:text-[#1164A3] transition-all duration-300 ${
                 isCollapsed ? "rotate-180" : ""
               }`}
               fill="none"
@@ -138,13 +93,13 @@ const Sidebar = ({
                   onClick={onItemClick}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "bg-[#1a365d] text-white shadow-md"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-gradient-to-r from-[#1164A3] to-[#1A9641] text-white shadow-md"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-[#1164A3]/10 hover:to-[#1A9641]/10"
                   } ${isCollapsed ? "justify-center" : ""}`}
                 >
                   <span
                     className={`transition-all duration-200 ${
-                      isActive ? "text-white" : "text-gray-500"
+                      isActive ? "text-white" : "text-[#1164A3]"
                     }`}
                   >
                     {item.icon}
@@ -174,8 +129,8 @@ const Sidebar = ({
       {/* Bottom Section */}
       {!isCollapsed && (
         <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-            <p className="text-xs text-[#1a365d] text-center font-semibold">
+          <div className="bg-gradient-to-r from-[#1164A3]/10 to-[#1A9641]/10 rounded-lg p-3 border border-[#1164A3]/20">
+            <p className="text-xs text-[#1164A3] text-center font-semibold">
               Grace International
             </p>
             <p className="text-xs text-gray-500 text-center mt-0.5">
