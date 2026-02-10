@@ -5,6 +5,9 @@ import { useLessonsStore } from "@/stores/Classes/Lessions";
 import { useLessonProgressStore } from "@/stores/Classes/LessonProgress";
 import type { LessonFormData } from "@/stores/Classes/Lessions";
 import { useAuthStore } from "@/stores/Auth/auth";
+import { useBranchStore } from "@/stores/Branch";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/Components/Toast";
 import {
   BookOpen,
   Plus,
@@ -17,10 +20,12 @@ import {
   FileText,
   PlayCircle,
   GraduationCap,
+  Building2,
 } from "lucide-react";
 
 const Class = () => {
   const { user } = useAuthStore();
+  const { toasts, addToast, removeToast } = useToast();
   const {
     courses,
     loading: coursesLoading,
@@ -34,6 +39,7 @@ const Class = () => {
   const {
     sections,
     loading: sectionsLoading,
+    error: sectionsError,
     fetchSections,
     createSection,
     updateSection,
@@ -42,14 +48,18 @@ const Class = () => {
   const {
     lessons,
     loading: lessonsLoading,
+    error: lessonsError,
     fetchLessons,
     createLesson,
     updateLesson,
     deleteLesson,
   } = useLessonsStore();
   const { progress, fetchProgress } = useLessonProgressStore();
+  const { branches, fetchBranches } = useBranchStore();
 
   const isStudent = user?.role === "student" || user?.student_id;
+  const isSuperadmin = user?.role === "superadmin";
+  const isAdmin = user?.role === "admin";
 
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
@@ -71,6 +81,7 @@ const Class = () => {
     title: "",
     description: "",
     course_type: "IELTS" as "IELTS" | "PTE",
+    branch: undefined as number | undefined,
     is_active: true,
   });
 
@@ -97,6 +108,7 @@ const Class = () => {
       fetchSections();
       fetchLessons();
       fetchProgress();
+      fetchBranches();
       setHasFetched(true);
     }
   }, []);
@@ -138,37 +150,70 @@ const Class = () => {
 
   const handleCourseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Clear any previous errors
+    clearCourseError();
+
     if (isEditMode && editingId) {
       await updateCourse(editingId, courseFormData);
     } else {
       await createCourse(courseFormData);
     }
-    if (!coursesError) {
-      setIsCourseModalOpen(false);
-      setCourseFormData({
-        title: "",
-        description: "",
-        course_type: "IELTS",
-        is_active: true,
-      });
-      setIsEditMode(false);
-      setEditingId(null);
-      fetchCourses();
-    }
+
+    // Check error state after operation completes
+    setTimeout(() => {
+      const currentError = useCoursesStore.getState().error;
+
+      if (!currentError) {
+        addToast(
+          "success",
+          isEditMode
+            ? "Course updated successfully!"
+            : "Course created successfully!",
+        );
+        setIsCourseModalOpen(false);
+        setCourseFormData({
+          title: "",
+          description: "",
+          course_type: "IELTS",
+          branch: undefined,
+          is_active: true,
+        });
+        setIsEditMode(false);
+        setEditingId(null);
+        fetchCourses();
+      }
+      // If there's an error, it will show in the modal
+    }, 100);
   };
 
   const handleSectionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (isEditMode && editingId) {
       await updateSection(editingId, sectionFormData);
     } else {
       await createSection(sectionFormData);
     }
-    setIsSectionModalOpen(false);
-    setSectionFormData({ name: "listening", course: 0, is_active: true });
-    setIsEditMode(false);
-    setEditingId(null);
-    fetchSections();
+
+    setTimeout(() => {
+      const currentError = useSectionsStore.getState().error;
+
+      if (!currentError) {
+        addToast(
+          "success",
+          isEditMode
+            ? "Section updated successfully!"
+            : "Section created successfully!",
+        );
+        setIsSectionModalOpen(false);
+        setSectionFormData({ name: "listening", course: 0, is_active: true });
+        setIsEditMode(false);
+        setEditingId(null);
+        fetchSections();
+      }
+      // If there's an error, it will show in the modal
+    }, 100);
   };
 
   const handleLessonSubmit = async (e: React.FormEvent) => {
@@ -199,20 +244,34 @@ const Class = () => {
     } else {
       await createLesson(lessonData);
     }
-    setIsLessonModalOpen(false);
-    setLessonFormData({
-      title: "",
-      content: "",
-      section: 0,
-      order: 1,
-      file: null,
-      video_url: "",
-      pdf_url: "",
-      is_active: true,
-    });
-    setIsEditMode(false);
-    setEditingId(null);
-    fetchLessons();
+
+    setTimeout(() => {
+      const currentError = useLessonsStore.getState().error;
+
+      if (!currentError) {
+        addToast(
+          "success",
+          isEditMode
+            ? "Lesson updated successfully!"
+            : "Lesson created successfully!",
+        );
+        setIsLessonModalOpen(false);
+        setLessonFormData({
+          title: "",
+          content: "",
+          section: 0,
+          order: 1,
+          file: null,
+          video_url: "",
+          pdf_url: "",
+          is_active: true,
+        });
+        setIsEditMode(false);
+        setEditingId(null);
+        fetchLessons();
+      }
+      // If there's an error, it will show in the modal
+    }, 100);
   };
 
   const handleEditCourse = (course: any) => {
@@ -222,6 +281,7 @@ const Class = () => {
       title: course.title,
       description: course.description || "",
       course_type: course.course_type || "IELTS",
+      branch: course.branch || undefined,
       is_active: course.is_active ?? true,
     });
     clearCourseError();
@@ -235,7 +295,18 @@ const Class = () => {
       )
     ) {
       await deleteCourse(id);
-      fetchCourses();
+
+      setTimeout(() => {
+        const currentError = useCoursesStore.getState().error;
+
+        if (!currentError) {
+          addToast("warning", "Course deleted successfully!");
+        } else {
+          addToast("error", currentError);
+        }
+
+        fetchCourses();
+      }, 100);
     }
   };
 
@@ -262,7 +333,18 @@ const Class = () => {
       )
     ) {
       await deleteSection(id);
-      fetchSections();
+
+      setTimeout(() => {
+        const currentError = useSectionsStore.getState().error;
+
+        if (!currentError) {
+          addToast("warning", "Section deleted successfully!");
+        } else {
+          addToast("error", currentError);
+        }
+
+        fetchSections();
+      }, 100);
     }
   };
 
@@ -301,7 +383,18 @@ const Class = () => {
   const handleDeleteLesson = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this lesson?")) {
       await deleteLesson(id);
-      fetchLessons();
+
+      setTimeout(() => {
+        const currentError = useLessonsStore.getState().error;
+
+        if (!currentError) {
+          addToast("warning", "Lesson deleted successfully!");
+        } else {
+          addToast("error", currentError);
+        }
+
+        fetchLessons();
+      }, 100);
     }
   };
 
@@ -319,7 +412,7 @@ const Class = () => {
     // Mark lesson as completed when closing video
     if (selectedLesson) {
       const { updateProgress } = useLessonProgressStore.getState();
-      updateProgress(selectedLesson.id, 100, true); // Mark as 100% and completed
+      updateProgress(selectedLesson.id, true); // Mark as completed
     }
     setIsVideoModalOpen(false);
     setSelectedLesson(null);
@@ -338,7 +431,7 @@ const Class = () => {
   const handleStartVideo = async () => {
     if (selectedLesson) {
       const { updateProgress } = useLessonProgressStore.getState();
-      await updateProgress(selectedLesson.id, 50, false); // Mark as 50% progress when starting
+      await updateProgress(selectedLesson.id, false); // Mark as started (not completed yet)
     }
     setIsIntroModalOpen(false);
     setIsVideoModalOpen(true);
@@ -363,8 +456,18 @@ const Class = () => {
 
   // Student View - Learning Interface
   if (isStudent) {
+    // Filter courses - students see only enrolled courses
+    const studentCourses = courses.filter((c) => {
+      if (!c.is_active) return false;
+      // Check if student is enrolled in this course
+      const enrolledCourseIds =
+        user?.enrolled_courses?.map((ec) => ec.id) || [];
+      return enrolledCourseIds.includes(c.id);
+    });
+
     return (
       <div className="p-4 sm:p-6 lg:p-8">
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
         {/* Header */}
         <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
           <div className="flex items-center gap-3">
@@ -382,225 +485,229 @@ const Class = () => {
 
         {/* Courses Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses
-            .filter((c) => c.is_active)
-            .map((course) => {
-              const courseSections = sections.filter(
-                (s) => s.course === course.id && s.is_active,
-              );
-              const totalLessons = courseSections.reduce((acc, section) => {
-                return (
-                  acc +
-                  lessons.filter((l) => l.section === section.id && l.is_active)
-                    .length
-                );
-              }, 0);
-
+          {studentCourses.map((course) => {
+            const courseSections = sections.filter(
+              (s) => s.course === course.id && s.is_active,
+            );
+            const totalLessons = courseSections.reduce((acc, section) => {
               return (
-                <div
-                  key={course.id}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200"
-                >
-                  {/* Course Card Header */}
-                  <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] p-6 text-white">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        <BookOpen className="w-6 h-6" />
-                      </div>
+                acc +
+                lessons.filter((l) => l.section === section.id && l.is_active)
+                  .length
+              );
+            }, 0);
+
+            return (
+              <div
+                key={course.id}
+                className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200"
+              >
+                {/* Course Card Header */}
+                <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] p-6 text-white">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                      <BookOpen className="w-6 h-6" />
+                    </div>
+                    <div className="flex flex-col gap-1 items-end">
                       <span className="text-xs bg-white/20 px-3 py-1 rounded-full font-semibold">
                         {course.course_type}
                       </span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                    <p className="text-blue-100 text-sm line-clamp-2">
-                      {course.description}
-                    </p>
-                  </div>
-
-                  {/* Course Stats */}
-                  <div className="p-4 bg-gray-50 border-b border-gray-200">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">
-                        {courseSections.length} Sections
-                      </span>
-                      <span className="text-gray-600">
-                        {totalLessons} Lessons
-                      </span>
+                      {course.branch_name && (
+                        <span className="text-xs bg-white/20 px-3 py-1 rounded-full font-semibold flex items-center gap-1">
+                          <Building2 className="w-3 h-3" />
+                          {course.branch_name}
+                        </span>
+                      )}
                     </div>
                   </div>
+                  <h3 className="text-xl font-bold mb-2">{course.title}</h3>
+                  <p className="text-blue-100 text-sm line-clamp-2">
+                    {course.description}
+                  </p>
+                </div>
 
-                  {/* Sections List */}
-                  <div className="p-4 space-y-3">
-                    {courseSections.length === 0 ? (
-                      <p className="text-center text-gray-400 py-4 text-sm">
-                        No sections available yet
-                      </p>
-                    ) : (
-                      courseSections.map((section) => {
-                        const sectionLessons = lessons.filter(
-                          (l) => l.section === section.id && l.is_active,
-                        );
-                        const isExpanded = expandedSections.has(section.id);
-
-                        return (
-                          <div
-                            key={section.id}
-                            className="border border-gray-200 rounded-lg overflow-hidden"
-                          >
-                            {/* Section Header */}
-                            <button
-                              onClick={() => toggleSection(section.id)}
-                              className="w-full p-3 bg-gray-50 hover:bg-gray-100 transition flex items-center justify-between"
-                            >
-                              <div className="flex items-center gap-2">
-                                <List className="w-4 h-4 text-gray-600" />
-                                <span className="font-medium text-gray-800 capitalize text-sm">
-                                  {section.name}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">
-                                  {sectionLessons.length} lessons
-                                </span>
-                                {isExpanded ? (
-                                  <ChevronDown className="w-4 h-4 text-gray-600" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4 text-gray-600" />
-                                )}
-                              </div>
-                            </button>
-
-                            {/* Lessons List */}
-                            {isExpanded && (
-                              <div className="p-2 space-y-1 bg-white">
-                                {sectionLessons.length === 0 ? (
-                                  <p className="text-center text-gray-400 py-3 text-xs">
-                                    No lessons available
-                                  </p>
-                                ) : (
-                                  sectionLessons.map((lesson) => {
-                                    const lessonProgress = progress[lesson.id];
-                                    return (
-                                      <div
-                                        key={lesson.id}
-                                        onClick={() =>
-                                          handleLessonIntroClick(lesson)
-                                        }
-                                        className="flex items-center gap-2 p-2 hover:bg-blue-50 rounded transition cursor-pointer group"
-                                      >
-                                        <PlayCircle className="w-4 h-4 text-[#1a365d] flex-shrink-0" />
-                                        <div className="flex-1 min-w-0">
-                                          <span className="text-sm text-gray-700 block truncate">
-                                            {lesson.title}
-                                          </span>
-                                          {lessonProgress &&
-                                            lessonProgress.progress_percentage >
-                                              0 && (
-                                              <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                                <div
-                                                  className={`h-full transition-all ${
-                                                    lessonProgress.is_completed
-                                                      ? "bg-green-500"
-                                                      : "bg-blue-500"
-                                                  }`}
-                                                  style={{
-                                                    width: `${lessonProgress.progress_percentage}%`,
-                                                  }}
-                                                />
-                                              </div>
-                                            )}
-                                        </div>
-                                        {lesson.file_url && (
-                                          <div className="flex items-center gap-1">
-                                            <FileText className="w-3 h-3 text-gray-400" />
-                                            {lesson.file_type && (
-                                              <span className="text-xs text-gray-500">
-                                                .{lesson.file_type}
-                                              </span>
-                                            )}
-                                          </div>
-                                        )}
-                                        {lessonProgress?.is_completed && (
-                                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
-                                            Done
-                                          </span>
-                                        )}
-                                      </div>
-                                    );
-                                  })
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-
-                  {/* Course Action */}
-                  <div className="p-4 bg-gray-50 border-t border-gray-200">
-                    {(() => {
-                      const courseSections = sections.filter(
-                        (s) => s.course === course.id && s.is_active,
-                      );
-                      const courseLessons = courseSections.flatMap((section) =>
-                        lessons.filter(
-                          (l) => l.section === section.id && l.is_active,
-                        ),
-                      );
-                      const completedLessons = courseLessons.filter(
-                        (lesson) => progress[lesson.id]?.is_completed,
-                      ).length;
-                      const courseProgress =
-                        courseLessons.length > 0
-                          ? Math.round(
-                              (completedLessons / courseLessons.length) * 100,
-                            )
-                          : 0;
-
-                      return (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-gray-600 font-medium">
-                              Progress: {completedLessons}/
-                              {courseLessons.length}
-                            </span>
-                            <span className="text-gray-700 font-semibold">
-                              {courseProgress}%
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-[#1a365d] to-[#2c5282] transition-all duration-300"
-                              style={{ width: `${courseProgress}%` }}
-                            />
-                          </div>
-                          <button className="w-full bg-[#1a365d] text-white py-2 rounded-lg hover:bg-[#2c5282] transition font-medium text-sm">
-                            {courseProgress === 100
-                              ? "Course Completed! 🎉"
-                              : courseProgress > 0
-                                ? "Continue Learning"
-                                : "Start Learning"}
-                          </button>
-                        </div>
-                      );
-                    })()}
+                {/* Course Stats */}
+                <div className="p-4 bg-gray-50 border-b border-gray-200">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">
+                      {courseSections.length} Sections
+                    </span>
+                    <span className="text-gray-600">
+                      {totalLessons} Lessons
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Sections List */}
+                <div className="p-4 space-y-3">
+                  {courseSections.length === 0 ? (
+                    <p className="text-center text-gray-400 py-4 text-sm">
+                      No sections available yet
+                    </p>
+                  ) : (
+                    courseSections.map((section) => {
+                      const sectionLessons = lessons.filter(
+                        (l) => l.section === section.id && l.is_active,
+                      );
+                      const isExpanded = expandedSections.has(section.id);
+
+                      return (
+                        <div
+                          key={section.id}
+                          className="border border-gray-200 rounded-lg overflow-hidden"
+                        >
+                          {/* Section Header */}
+                          <button
+                            onClick={() => toggleSection(section.id)}
+                            className="w-full p-3 bg-gray-50 hover:bg-gray-100 transition flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <List className="w-4 h-4 text-gray-600" />
+                              <span className="font-medium text-gray-800 capitalize text-sm">
+                                {section.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-gray-500">
+                                {sectionLessons.length} lessons
+                              </span>
+                              {isExpanded ? (
+                                <ChevronDown className="w-4 h-4 text-gray-600" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-gray-600" />
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Lessons List */}
+                          {isExpanded && (
+                            <div className="p-2 space-y-1 bg-white">
+                              {sectionLessons.length === 0 ? (
+                                <p className="text-center text-gray-400 py-3 text-xs">
+                                  No lessons available
+                                </p>
+                              ) : (
+                                sectionLessons.map((lesson) => {
+                                  const lessonProgress = progress[lesson.id];
+                                  return (
+                                    <div
+                                      key={lesson.id}
+                                      onClick={() =>
+                                        handleLessonIntroClick(lesson)
+                                      }
+                                      className="flex items-center gap-2 p-2 hover:bg-blue-50 rounded transition cursor-pointer group"
+                                    >
+                                      <PlayCircle className="w-4 h-4 text-[#1a365d] flex-shrink-0" />
+                                      <div className="flex-1 min-w-0">
+                                        <span className="text-sm text-gray-700 block truncate">
+                                          {lesson.title}
+                                        </span>
+                                        {lessonProgress &&
+                                          lessonProgress.is_completed && (
+                                            <div className="mt-1 h-1 bg-gray-200 rounded-full overflow-hidden">
+                                              <div
+                                                className={`h-full transition-all ${
+                                                  lessonProgress.is_completed
+                                                    ? "bg-green-500"
+                                                    : "bg-blue-500"
+                                                }`}
+                                                style={{
+                                                  width: `${lessonProgress.is_completed ? 100 : 0}%`,
+                                                }}
+                                              />
+                                            </div>
+                                          )}
+                                      </div>
+                                      {lesson.file_url && (
+                                        <div className="flex items-center gap-1">
+                                          <FileText className="w-3 h-3 text-gray-400" />
+                                          {lesson.file_type && (
+                                            <span className="text-xs text-gray-500">
+                                              .{lesson.file_type}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {lessonProgress?.is_completed && (
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                                          Done
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Course Action */}
+                <div className="p-4 bg-gray-50 border-t border-gray-200">
+                  {(() => {
+                    const courseSections = sections.filter(
+                      (s) => s.course === course.id && s.is_active,
+                    );
+                    const courseLessons = courseSections.flatMap((section) =>
+                      lessons.filter(
+                        (l) => l.section === section.id && l.is_active,
+                      ),
+                    );
+                    const completedLessons = courseLessons.filter(
+                      (lesson) => progress[lesson.id]?.is_completed,
+                    ).length;
+                    const courseProgress =
+                      courseLessons.length > 0
+                        ? Math.round(
+                            (completedLessons / courseLessons.length) * 100,
+                          )
+                        : 0;
+
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-gray-600 font-medium">
+                            Progress: {completedLessons}/{courseLessons.length}
+                          </span>
+                          <span className="text-gray-700 font-semibold">
+                            {courseProgress}%
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-[#1a365d] to-[#2c5282] transition-all duration-300"
+                            style={{ width: `${courseProgress}%` }}
+                          />
+                        </div>
+                        <button className="w-full bg-[#1a365d] text-white py-2 rounded-lg hover:bg-[#2c5282] transition font-medium text-sm">
+                          {courseProgress === 100
+                            ? "Course Completed! 🎉"
+                            : courseProgress > 0
+                              ? "Continue Learning"
+                              : "Start Learning"}
+                        </button>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {courses.filter((c) => c.is_active).length === 0 && !coursesLoading && (
+        {studentCourses.length === 0 && !coursesLoading && (
           <div className="bg-white rounded-lg shadow-sm p-16 text-center border border-gray-200">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <BookOpen className="w-12 h-12 text-gray-400" />
             </div>
             <p className="text-gray-600 text-xl font-semibold mb-2">
-              No courses available
+              No courses enrolled
             </p>
             <p className="text-gray-400 text-sm">
-              Check back later for new courses
+              Contact your admin to enroll in courses
             </p>
           </div>
         )}
@@ -787,8 +894,22 @@ const Class = () => {
   }
 
   // Teacher/Admin View - Management Interface
+  // Filter courses based on user role and branch
+  const filteredCourses = courses.filter((c) => {
+    // Superadmin sees all courses
+    if (isSuperadmin) return true;
+
+    // Admin and Teacher see only their branch courses
+    if ((isAdmin || user?.role === "teacher") && user?.branch_id) {
+      return c.branch === user.branch_id;
+    }
+
+    return true;
+  });
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* Header */}
       <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -802,6 +923,7 @@ const Class = () => {
               </h1>
               <p className="text-blue-100 mt-1">
                 Manage courses, sections, and lessons
+                {user?.branch && ` - ${user.branch}`}
               </p>
             </div>
           </div>
@@ -813,6 +935,7 @@ const Class = () => {
                 title: "",
                 description: "",
                 course_type: "IELTS",
+                branch: undefined,
                 is_active: true,
               });
               clearCourseError();
@@ -840,7 +963,7 @@ const Class = () => {
 
       {/* Courses List */}
       <div className="space-y-4">
-        {courses.map((course) => (
+        {filteredCourses.map((course) => (
           <div
             key={course.id}
             className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-all duration-300"
@@ -875,8 +998,14 @@ const Class = () => {
                       <span className="text-xs bg-blue-50 text-[#1a365d] px-2.5 py-1 rounded-full font-semibold">
                         {course.course_type}
                       </span>
+                      {course.branch_name && (
+                        <span className="text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
+                          <Building2 className="w-3 h-3" />
+                          {course.branch_name}
+                        </span>
+                      )}
                       <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-semibold ${course.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                        className={`text-xs px-2.5 py-1 rounded-full font-semibold ${course.is_active ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
                       >
                         {course.is_active ? "Active" : "Inactive"}
                       </span>
@@ -941,7 +1070,7 @@ const Class = () => {
                                 {section.name}
                               </h4>
                               <span
-                                className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${section.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                                className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${section.is_active ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
                               >
                                 {section.is_active ? "Active" : "Inactive"}
                               </span>
@@ -1007,7 +1136,7 @@ const Class = () => {
                                           </span>
                                         )}
                                         <span
-                                          className={`text-xs px-2 py-0.5 rounded ${lesson.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-700"}`}
+                                          className={`text-xs px-2 py-0.5 rounded ${lesson.is_active ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
                                         >
                                           {lesson.is_active
                                             ? "Active"
@@ -1046,7 +1175,7 @@ const Class = () => {
           </div>
         ))}
 
-        {courses.length === 0 && !coursesLoading && (
+        {filteredCourses.length === 0 && !coursesLoading && (
           <div className="bg-white rounded-lg shadow-sm p-16 text-center border border-gray-200">
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <BookOpen className="w-12 h-12 text-gray-400" />
@@ -1065,6 +1194,7 @@ const Class = () => {
                   title: "",
                   description: "",
                   course_type: "IELTS",
+                  branch: undefined,
                   is_active: true,
                 });
                 clearCourseError();
@@ -1173,6 +1303,54 @@ const Class = () => {
                 </div>
               </div>
 
+              {isSuperadmin && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={courseFormData.branch || ""}
+                    onChange={(e) =>
+                      setCourseFormData({
+                        ...courseFormData,
+                        branch: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      })
+                    }
+                    required={isSuperadmin}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  >
+                    <option value="">Select Branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch.id} value={branch.id}>
+                        {branch.name} ({branch.code})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select which branch this course belongs to
+                  </p>
+                </div>
+              )}
+
+              {isAdmin && user?.branch_id && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch
+                  </label>
+                  <input
+                    type="text"
+                    value={user?.branch || "Your Branch"}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Courses will be created for your branch automatically
+                  </p>
+                </div>
+              )}
+
               {coursesError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">
                   <p className="text-red-700 text-sm">{coursesError}</p>
@@ -1271,6 +1449,12 @@ const Class = () => {
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
+
+              {sectionsError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-700 text-sm">{sectionsError}</p>
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button
@@ -1461,6 +1645,12 @@ const Class = () => {
                   Link to PDF materials or study guide
                 </p>
               </div>
+
+              {lessonsError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-red-700 text-sm">{lessonsError}</p>
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button

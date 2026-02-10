@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, AlertCircle, CheckCircle2 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/Auth/auth";
-import logo from "@/assets/logo.png";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/Components/Toast";
+// import logo from "@/assets/logo.png";
 import logo1 from "@/assets/logo1.png";
+
 interface LoginErrors {
   username?: string;
   password?: string;
@@ -16,17 +19,47 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
-  const [success, setSuccess] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const { toasts, addToast, removeToast } = useToast();
+
   const navigate = useNavigate();
   const { login, isAuthenticated, loading, error, clearError } = useAuthStore();
 
-  // Redirect if already authenticated
+  // Clear any stale auth errors on component mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  // Redirect if already authenticated and show success toast
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      addToast("success", "Login successful! Redirecting to dashboard...");
+
+      // Redirect to dashboard after 1.5 seconds
+      const redirectTimer = setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+
+      return () => clearTimeout(redirectTimer);
     }
   }, [isAuthenticated, navigate]);
+
+  // Show toast for auth errors (but don't reload if it's a session expiry message)
+  useEffect(() => {
+    if (error) {
+      // Only show toast if it's not a session expired message (user is already on login page)
+      if (!error.toLowerCase().includes("session expired")) {
+        addToast("error", error);
+      }
+
+      // Clear the error after showing it
+      const clearTimer = setTimeout(() => {
+        clearError();
+      }, 1000);
+
+      return () => clearTimeout(clearTimer);
+    }
+  }, [error, clearError]);
 
   const validateForm = (): LoginErrors => {
     const newErrors: LoginErrors = {};
@@ -57,29 +90,28 @@ const Login = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
+      // Show validation errors as toast
+      const firstError = Object.values(newErrors)[0];
+      if (firstError) {
+        addToast("error", firstError);
+      }
       return;
     }
 
-    try {
-      // Store remember me preference
-      if (rememberMe) {
-        localStorage.setItem("rememberUsername", username.trim());
-      } else {
-        localStorage.removeItem("rememberUsername");
-      }
+    // Store remember me preference
+    if (rememberMe) {
+      localStorage.setItem("rememberUsername", username.trim());
+    } else {
+      localStorage.removeItem("rememberUsername");
+    }
 
+    try {
       // Use the auth store login method
       await login({ username: username.trim(), password });
 
-      setSuccess(true);
-
-      // Redirect to dashboard after 1.5 seconds
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1500);
+      // Success toast will be shown by the useEffect watching isAuthenticated
     } catch (error: unknown) {
-      console.error("Login error:", error);
-      // Error is handled by the auth store
+      // Error toast is handled by the useEffect hook watching the error state
     }
   };
 
@@ -93,17 +125,21 @@ const Login = () => {
     }
   };
 
-  // Load remembered username on component mount
+  // Load remembered username on component mount and clear any session errors
   useEffect(() => {
     const rememberedUsername = localStorage.getItem("rememberUsername");
     if (rememberedUsername) {
       setUsername(rememberedUsername);
       setRememberMe(true);
     }
-  }, []);
+
+    // Clear any existing auth errors when login page loads
+    clearError();
+  }, [clearError]);
 
   return (
     <div className="min-h-screen relative">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#1164A3]/90 via-[#1164A3]/85 to-[#1A9641]/90 sm:from-[#1164A3]/85 sm:via-[#1164A3]/80 sm:to-[#1A9641]/85"></div>
 
@@ -129,11 +165,11 @@ const Login = () => {
                 />
               </div>
               <div className="w-25 h-25 lg:w-25 lg:h-25 flex items-center justify-center">
-                <img
+                {/* <img
                   src={logo}
                   alt="Grace International Logo"
                   className="w-full h-full object-contain"
-                />
+                /> */}
               </div>
             </div>
           </div>
@@ -203,12 +239,12 @@ const Login = () => {
           <div className="w-full max-w-md">
             {/* Mobile Logo */}
             <div className="lg:hidden flex flex-col items-center gap-3 mb-6 sm:mb-8">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white/50 p-3">
-                <img
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/95 backdrop-blur-sm  rounded-2xl flex items-center justify-center shadow-2xl border-4 border-white/50 p-3">
+                {/* <img
                   src={logo}
                   alt="Grace International Logo"
                   className="w-full h-full object-contain"
-                />
+                /> */}
               </div>
               <div className="text-center">
                 <h1 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
@@ -228,33 +264,6 @@ const Login = () => {
               <p className="text-sm sm:text-base text-gray-500 mb-5 sm:mb-6">
                 Enter your credentials to access your account
               </p>
-
-              {success && (
-                <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg flex items-start sm:items-center gap-2 sm:gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-                  <span className="text-sm sm:text-base text-green-700 font-medium">
-                    Login successful! Redirecting...
-                  </span>
-                </div>
-              )}
-
-              {error && (
-                <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-start sm:items-center gap-2 sm:gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-                  <span className="text-sm sm:text-base text-red-700 font-medium break-words">
-                    {error}
-                  </span>
-                </div>
-              )}
-
-              {errors.submit && (
-                <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg flex items-start sm:items-center gap-2 sm:gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-                  <span className="text-sm sm:text-base text-red-700 font-medium break-words">
-                    {errors.submit}
-                  </span>
-                </div>
-              )}
 
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                 {/* Username */}

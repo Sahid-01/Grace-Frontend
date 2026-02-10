@@ -10,10 +10,21 @@ export interface UserData {
   first_name?: string;
   last_name?: string;
   role: string;
+  branch?: number | null;
+  branch_name?: string;
+  enrolled_courses?: number[];
+  enrolled_courses_details?: Array<{
+    id: number;
+    title: string;
+    course_type: string;
+    branch: string | null;
+  }>;
   is_active?: boolean;
   is_deleted?: boolean;
   student_id?: string | null;
   employee_id?: string | null;
+  password?: string;
+  password_confirm?: string;
 }
 
 export interface PaginationMeta {

@@ -1,5 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FileText, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  GraduationCap,
+  Briefcase,
+} from "lucide-react";
 import { useAuthStore } from "@/stores/Auth/auth";
 
 interface SidebarProps {
@@ -33,6 +39,44 @@ const Sidebar = ({
       path: "/classes",
       icon: <FileText className="w-5 h-5" />,
     },
+    {
+      name: "My Profile",
+      path: "/profile",
+      icon: <Users className="w-5 h-5" />,
+      hideForRoles: [],
+    },
+    // Management profile links based on role
+    ...(user?.role === "teacher"
+      ? [
+          {
+            name: "Student Profiles",
+            path: "/profile/student",
+            icon: <GraduationCap className="w-5 h-5" />,
+            hideForRoles: [],
+          },
+        ]
+      : user?.role === "admin" || user?.role === "superadmin"
+        ? [
+            {
+              name: "User Profiles",
+              path: "/profile/user",
+              icon: <Users className="w-5 h-5" />,
+              hideForRoles: [],
+            },
+            {
+              name: "Student Profiles",
+              path: "/profile/student",
+              icon: <GraduationCap className="w-5 h-5" />,
+              hideForRoles: [],
+            },
+            {
+              name: "Teacher Profiles",
+              path: "/profile/teacher",
+              icon: <Briefcase className="w-5 h-5" />,
+              hideForRoles: [],
+            },
+          ]
+        : []),
   ];
 
   // Filter menu items based on user role

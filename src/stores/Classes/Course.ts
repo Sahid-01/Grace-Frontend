@@ -7,6 +7,8 @@ export interface CourseData {
   title: string;
   description: string;
   course_type: "IELTS" | "PTE";
+  branch?: number | null;
+  branch_name?: string;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

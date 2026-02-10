@@ -1,6 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { useUsersStore } from "@/stores/Auth/Users";
 import { useAuthStore } from "@/stores/Auth/auth";
+import { useBranchStore } from "@/stores/Branch";
+import { useCoursesStore } from "@/stores/Classes/Course";
+import { useToast } from "@/hooks/useToast";
+import { ToastContainer } from "@/Components/Toast";
 import {
   Users as UsersIcon,
   Plus,
@@ -13,9 +17,12 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Building2,
+  BookOpen,
 } from "lucide-react";
 
 const Users = () => {
+  const { toasts, addToast, removeToast } = useToast();
   const {
     users,
     loading,
@@ -29,7 +36,9 @@ const Users = () => {
     updateUser,
     clearError,
   } = useUsersStore();
-  const { user: currentUser } = useAuthStore();
+  const { user: currentUser, self } = useAuthStore();
+  const { branches, fetchBranches } = useBranchStore();
+  const { courses, fetchCourses } = useCoursesStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
@@ -38,12 +47,19 @@ const Users = () => {
     username: "",
     email: "",
     password: "",
+    password_confirm: "",
     first_name: "",
     last_name: "",
     role: "student",
+    branch: undefined as number | undefined,
+    enrolled_courses: [] as number[],
     student_id: "",
     employee_id: "",
   });
+
+  const isSuperadmin = currentUser?.role === "superadmin";
+  const isAdmin = currentUser?.role === "admin";
+  const isTeacher = currentUser?.role === "teacher";
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,7 +78,10 @@ const Users = () => {
 
   useEffect(() => {
     if (!hasFetched.current) {
+      self(); // Fetch current user data
       fetchUsers(currentPage, perPage);
+      fetchBranches();
+      fetchCourses();
       hasFetched.current = true;
     }
   }, []);
@@ -114,7 +133,13 @@ const Users = () => {
     e.preventDefault();
 
     if (!currentUser?.role) {
-      alert("Unable to determine your role");
+      addToast("error", "Unable to determine your role");
+      return;
+    }
+
+    // Password validation
+    if (formData.password && formData.password !== formData.password_confirm) {
+      addToast("error", "Passwords don't match");
       return;
     }
 
@@ -128,10 +153,28 @@ const Users = () => {
 
     if (!isEditMode && formData.password) {
       userData.password = formData.password;
+      userData.password_confirm = formData.password_confirm;
     }
 
     if (formData.student_id) userData.student_id = formData.student_id;
     if (formData.employee_id) userData.employee_id = formData.employee_id;
+
+    // Branch assignment
+    if (isSuperadmin && formData.branch) {
+      // Superadmin explicitly selects branch
+      userData.branch = formData.branch;
+    } else if ((isAdmin || isTeacher) && currentUser?.branch_id) {
+      // Admin and Teacher auto-assign their branch
+      userData.branch = currentUser.branch_id;
+    }
+
+    // Enrolled courses (only for students)
+    if (formData.role === "student" && formData.enrolled_courses.length > 0) {
+      userData.enrolled_courses = formData.enrolled_courses;
+    }
+
+    // Clear previous errors
+    clearError();
 
     if (isEditMode && editingUserId) {
       await updateUser(editingUserId, userData);
@@ -139,29 +182,45 @@ const Users = () => {
       await createUser(userData, currentUser.role);
     }
 
-    if (!error) {
-      setIsModalOpen(false);
-      setIsEditMode(false);
-      setEditingUserId(null);
-      setFormData({
-        username: "",
-        email: "",
-        password: "",
-        first_name: "",
-        last_name: "",
-        role: "student",
-        student_id: "",
-        employee_id: "",
-      });
-      // Refresh current page
-      const filters = {
-        search: searchQuery,
-        role: roleFilter,
-        student_id: studentIdFilter,
-        employee_id: employeeIdFilter,
-      };
-      fetchUsers(currentPage, perPage, filters);
-    }
+    // Check error state after operation completes
+    setTimeout(() => {
+      const currentError = useUsersStore.getState().error;
+
+      if (!currentError) {
+        addToast(
+          "success",
+          isEditMode
+            ? "User updated successfully!"
+            : "User created successfully!",
+        );
+        setIsModalOpen(false);
+        setIsEditMode(false);
+        setEditingUserId(null);
+        setFormData({
+          username: "",
+          email: "",
+          password: "",
+          password_confirm: "",
+          first_name: "",
+          last_name: "",
+          role: "student",
+          branch: undefined,
+          enrolled_courses: [],
+          student_id: "",
+          employee_id: "",
+        });
+        // Refresh current page
+        const filters = {
+          search: searchQuery,
+          role: roleFilter,
+          student_id: studentIdFilter,
+          employee_id: employeeIdFilter,
+        };
+        fetchUsers(currentPage, perPage, filters);
+      }
+      // If there's an error, it will show in the modal (error state is already set by the store)
+      // No need to show toast for errors - user can see it in the modal and fix it
+    }, 100);
   };
 
   const handleEdit = (user: any) => {
@@ -171,9 +230,12 @@ const Users = () => {
       username: user.username,
       email: user.email,
       password: "",
+      password_confirm: "",
       first_name: user.first_name || "",
       last_name: user.last_name || "",
       role: user.role,
+      branch: user.branch || undefined,
+      enrolled_courses: user.enrolled_courses || [],
       student_id: user.student_id || "",
       employee_id: user.employee_id || "",
     });
@@ -188,9 +250,12 @@ const Users = () => {
       username: "",
       email: "",
       password: "",
+      password_confirm: "",
       first_name: "",
       last_name: "",
       role: "student",
+      branch: undefined,
+      enrolled_courses: [],
       student_id: "",
       employee_id: "",
     });
@@ -201,14 +266,25 @@ const Users = () => {
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       await deleteUser(id);
-      // Refresh current page
-      const filters = {
-        search: searchQuery,
-        role: roleFilter,
-        student_id: studentIdFilter,
-        employee_id: employeeIdFilter,
-      };
-      fetchUsers(currentPage, perPage, filters);
+
+      setTimeout(() => {
+        const currentError = useUsersStore.getState().error;
+
+        if (!currentError) {
+          addToast("warning", "User deleted successfully!");
+        } else {
+          addToast("error", currentError);
+        }
+
+        // Refresh current page
+        const filters = {
+          search: searchQuery,
+          role: roleFilter,
+          student_id: studentIdFilter,
+          employee_id: employeeIdFilter,
+        };
+        fetchUsers(currentPage, perPage, filters);
+      }, 100);
     }
   };
 
@@ -218,14 +294,29 @@ const Users = () => {
     } else {
       await activateUser(id);
     }
-    // Refresh current page
-    const filters = {
-      search: searchQuery,
-      role: roleFilter,
-      student_id: studentIdFilter,
-      employee_id: employeeIdFilter,
-    };
-    fetchUsers(currentPage, perPage, filters);
+
+    setTimeout(() => {
+      const currentError = useUsersStore.getState().error;
+
+      if (!currentError) {
+        if (isActive) {
+          addToast("warning", "User deactivated successfully!");
+        } else {
+          addToast("success", "User activated successfully!");
+        }
+      } else {
+        addToast("error", currentError);
+      }
+
+      // Refresh current page
+      const filters = {
+        search: searchQuery,
+        role: roleFilter,
+        student_id: studentIdFilter,
+        employee_id: employeeIdFilter,
+      };
+      fetchUsers(currentPage, perPage, filters);
+    }, 100);
   };
 
   const getAvailableRoles = () => {
@@ -336,6 +427,7 @@ const Users = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* Header */}
       <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -347,9 +439,16 @@ const Users = () => {
               <h1 className="text-2xl sm:text-3xl font-bold">
                 User Management
               </h1>
-              <p className="text-blue-100 mt-1">
-                Manage all users in the system
-              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-blue-100">Manage all users in the system</p>
+                {(isAdmin || currentUser?.role === "teacher") &&
+                  currentUser?.branch && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/20 rounded-full text-xs font-semibold">
+                      <Building2 className="w-3 h-3" />
+                      {currentUser.branch}
+                    </span>
+                  )}
+              </div>
             </div>
           </div>
           <button
@@ -506,6 +605,9 @@ const Users = () => {
                   Role
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  Branch
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                   ID
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -526,25 +628,38 @@ const Users = () => {
                     <div className="flex items-center gap-3">
                       <div className="w-11 h-11 bg-gradient-to-br from-[#1a365d] to-[#2c5282] rounded-full flex items-center justify-center text-white font-bold shadow-sm">
                         {user.first_name?.charAt(0).toUpperCase() ||
-                          user.username.charAt(0).toUpperCase()}
+                          user.username?.charAt(0).toUpperCase() ||
+                          "?"}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">
                           {user.first_name && user.last_name
                             ? `${user.first_name} ${user.last_name}`
-                            : user.full_name || user.username}
+                            : user.full_name || user.username || "Unknown"}
                         </p>
                         <p className="text-sm text-gray-500">
-                          @{user.username}
+                          @{user.username || "unknown"}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{user.email}</td>
+                  <td className="px-6 py-4 text-gray-700">
+                    {user.email || "-"}
+                  </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#1a365d] capitalize">
                       {user.role}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {user.branch_name ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700">
+                        <Building2 className="w-3 h-3" />
+                        {user.branch_name}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 text-sm">-</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-gray-700">
                     {user.role?.toLowerCase() === "student"
@@ -845,6 +960,21 @@ const Users = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm Password{" "}
+                    {!isEditMode && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="password"
+                    name="password_confirm"
+                    value={formData.password_confirm}
+                    onChange={handleInputChange}
+                    required={!isEditMode}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Role <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -888,6 +1018,251 @@ const Users = () => {
                   />
                 </div>
               </div>
+
+              {/* Branch Selection */}
+              {isSuperadmin && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch{" "}
+                    {formData.role !== "superadmin" && (
+                      <span className="text-red-500">*</span>
+                    )}
+                  </label>
+                  <select
+                    name="branch"
+                    value={formData.branch || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        branch: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                        enrolled_courses: [], // Reset enrolled courses when branch changes
+                      })
+                    }
+                    required={formData.role !== "superadmin"}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  >
+                    <option value="">Select Branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch.id} value={branch.id}>
+                        {branch.name} ({branch.code})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formData.role === "superadmin"
+                      ? "Superadmin users don't need branch assignment"
+                      : "Select which branch this user belongs to"}
+                  </p>
+                </div>
+              )}
+
+              {isAdmin && currentUser?.branch_id && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={currentUser?.branch || "Your Branch"}
+                      disabled
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <Building2 className="w-5 h-5 text-purple-600" />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Users will be created for your branch:{" "}
+                    <span className="font-semibold text-purple-700">
+                      {currentUser?.branch}
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {isTeacher && currentUser?.branch_id && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={currentUser?.branch || "Your Branch"}
+                      disabled
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <Building2 className="w-5 h-5 text-purple-600" />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Students will be created for your branch:{" "}
+                    <span className="font-semibold text-purple-700">
+                      {currentUser?.branch}
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {/* Show branch info for students (read-only when editing) */}
+              {formData.role === "student" && isEditMode && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Branch
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={
+                        isSuperadmin
+                          ? branches.find((b) => b.id === formData.branch)
+                              ?.name || "Not assigned"
+                          : currentUser?.branch || "Not assigned"
+                      }
+                      disabled
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <Building2 className="w-5 h-5 text-purple-600" />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Student's branch assignment (cannot be changed after
+                    creation)
+                  </p>
+                </div>
+              )}
+
+              {/* Enrolled Courses (for students only) */}
+              {formData.role === "student" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Enrolled Courses
+                  </label>
+                  <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto bg-gray-50">
+                    {(() => {
+                      // Determine which branch to filter by
+                      let branchToFilter = null;
+
+                      if (isSuperadmin) {
+                        branchToFilter = formData.branch;
+                      } else if (isAdmin || isTeacher) {
+                        // For admin and teacher, use their branch_id
+                        branchToFilter = currentUser?.branch_id;
+                      }
+
+                      const availableCourses = courses.filter((c) => {
+                        if (!c.is_active) return false;
+                        if (branchToFilter) {
+                          return c.branch === branchToFilter;
+                        }
+                        return false;
+                      });
+
+                      if (!branchToFilter) {
+                        return (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-gray-500 mb-2">
+                              {isSuperadmin
+                                ? "Please select a branch first"
+                                : "Loading branch information..."}
+                            </p>
+                            {isAdmin && (
+                              <p className="text-xs text-gray-400">
+                                Your branch:{" "}
+                                {currentUser?.branch || "Not assigned"}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }
+
+                      if (availableCourses.length === 0) {
+                        return (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-gray-500 mb-2">
+                              No courses available for this branch
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Branch ID: {branchToFilter}
+                            </p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="space-y-2">
+                          {availableCourses.map((course) => (
+                            <label
+                              key={course.id}
+                              className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.enrolled_courses.includes(
+                                  course.id,
+                                )}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFormData({
+                                      ...formData,
+                                      enrolled_courses: [
+                                        ...formData.enrolled_courses,
+                                        course.id,
+                                      ],
+                                    });
+                                  } else {
+                                    setFormData({
+                                      ...formData,
+                                      enrolled_courses:
+                                        formData.enrolled_courses.filter(
+                                          (id) => id !== course.id,
+                                        ),
+                                    });
+                                  }
+                                }}
+                                className="w-4 h-4 text-[#1a365d] border-gray-300 rounded focus:ring-[#1a365d]"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <BookOpen className="w-4 h-4 text-gray-500" />
+                                  <span className="text-sm font-medium text-gray-800">
+                                    {course.title}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                                    {course.course_type}
+                                  </span>
+                                  {course.branch_name && (
+                                    <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded flex items-center gap-1">
+                                      <Building2 className="w-3 h-3" />
+                                      {course.branch_name}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Select courses this student will be enrolled in
+                    {(isAdmin || isTeacher) && currentUser?.branch && (
+                      <span className="font-semibold text-purple-700">
+                        {" "}
+                        (from {currentUser.branch})
+                      </span>
+                    )}
+                  </p>
+                </div>
+              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3">

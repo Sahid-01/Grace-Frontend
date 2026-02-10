@@ -4,11 +4,14 @@ import { LessonProgressApi } from "@/Endpoints/Classes/LessonProgress";
 
 export interface LessonProgressData {
   id: number;
+  user: number;
+  user_username: string;
   lesson: number;
   lesson_title: string;
-  progress_percentage: number;
   is_completed: boolean;
-  last_accessed: string;
+  completed_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface LessonProgressState {
@@ -17,11 +20,7 @@ interface LessonProgressState {
   error: string | null;
 
   fetchProgress: () => Promise<void>;
-  updateProgress: (
-    lessonId: number,
-    progressPercentage: number,
-    isCompleted: boolean,
-  ) => Promise<void>;
+  updateProgress: (lessonId: number, isCompleted: boolean) => Promise<void>;
   getProgress: (lessonId: number) => LessonProgressData | null;
   clearError: () => void;
 }
@@ -62,19 +61,15 @@ export const useLessonProgressStore = create<LessonProgressState>()(
       }
     },
 
-    updateProgress: async (
-      lessonId: number,
-      progressPercentage: number,
-      isCompleted: boolean,
-    ) => {
+    updateProgress: async (lessonId: number, isCompleted: boolean) => {
       try {
         const token = localStorage.getItem("token");
 
+        // Create or update progress
         const res = await axios.post(
-          LessonProgressApi.updateProgressByLesson,
+          LessonProgressApi.createProgress,
           {
-            lesson_id: lessonId,
-            progress_percentage: progressPercentage,
+            lesson: lessonId,
             is_completed: isCompleted,
           },
           {
@@ -84,7 +79,7 @@ export const useLessonProgressStore = create<LessonProgressState>()(
           },
         );
 
-        const updatedProgress = res.data;
+        const updatedProgress = res.data.data || res.data;
 
         set((state) => ({
           progress: {

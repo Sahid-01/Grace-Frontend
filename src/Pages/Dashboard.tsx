@@ -29,7 +29,6 @@ const Dashboard = () => {
           clearError();
           await self();
         } catch (err: any) {
-          console.error("Error fetching user data:", err);
           if (err.response?.status === 401) {
             await logout();
           }

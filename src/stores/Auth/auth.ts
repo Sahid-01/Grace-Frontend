@@ -13,6 +13,13 @@ export interface User {
   last_name?: string;
   student_id?: string | null;
   employee_id?: string | null;
+  branch?: string | null;
+  branch_id?: number | null;
+  enrolled_courses?: Array<{
+    id: number;
+    title: string;
+    course_type: string;
+  }>;
 }
 
 interface AuthState {
@@ -37,6 +44,12 @@ function getToken(): string | null {
 
 function getRefresh(): string | null {
   return localStorage.getItem("refresh");
+}
+
+// Initialize axios header with token from localStorage
+const initialToken = getToken();
+if (initialToken) {
+  axios.defaults.headers.common["Authorization"] = `Bearer ${initialToken}`;
 }
 
 export const useAuthStore = create<AuthState>()((set, get) => ({

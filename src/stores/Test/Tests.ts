@@ -77,12 +77,10 @@ export const useTestsStore = create<TestsState>()((set) => ({
     set({ loading: true, error: null });
     try {
       const token = localStorage.getItem("token");
-      console.log("Creating test with data:", data);
       const res = await axios.post(TestsApi.createTest, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const newData = res.data.data || res.data;
-      console.log("Test created successfully:", newData);
       set((state) => ({
         tests: [...state.tests, newData],
         loading: false,

@@ -27,6 +27,7 @@ const Navbar = () => {
   }, []);
 
   const handleProfileClick = () => {
+    // All users go to their own profile page
     navigate("/profile");
     setIsDropdownOpen(false);
   };
