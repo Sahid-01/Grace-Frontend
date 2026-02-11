@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/Auth/auth";
 import { useStudentProfileStore } from "@/stores/Profile/StudentProfile";
 import { useTeacherProfileStore } from "@/stores/Profile/TeacherProfile";
 import { useUserProfileStore } from "@/stores/Profile/UserProfile";
+import { useUsersStore } from "@/stores/Auth/Users";
 import { useToast } from "@/hooks/useToast";
 import { ToastContainer } from "@/Components/Toast";
 import {
@@ -17,6 +18,8 @@ import {
   Save,
   X,
   GraduationCap,
+  Lock,
+  Plus,
 } from "lucide-react";
 
 const MyProfile = () => {
@@ -37,9 +40,16 @@ const MyProfile = () => {
     fetchProfiles: fetchUserProfiles,
     updateProfile: updateUserProfile,
   } = useUserProfileStore();
+  const { changePassword, loading: passwordLoading } = useUsersStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   // Student profile edit state
   const [studentEditData, setStudentEditData] = useState({
@@ -62,6 +72,10 @@ const MyProfile = () => {
     subject_specialization: "",
     qualification: "",
     experience_years: 0,
+    classes_assigned: "",
+    subjects_teaching: "",
+    certifications: "",
+    training_completed: "",
   });
 
   // User profile edit state
@@ -157,6 +171,10 @@ const MyProfile = () => {
         subject_specialization: teacherProfile.subject_specialization || "",
         qualification: teacherProfile.qualification || "",
         experience_years: teacherProfile.experience_years || 0,
+        classes_assigned: teacherProfile.classes_assigned || "",
+        subjects_teaching: teacherProfile.subjects_teaching || "",
+        certifications: teacherProfile.certifications || "",
+        training_completed: teacherProfile.training_completed || "",
       });
     }
   }, [teacherProfile]);
@@ -193,6 +211,44 @@ const MyProfile = () => {
       addToast(
         "error",
         err.response?.data?.message || "Failed to update profile",
+      );
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (
+      !passwordData.oldPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
+      addToast("error", "Please fill all password fields");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      addToast("error", "New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      addToast("error", "New password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      await changePassword(passwordData.oldPassword, passwordData.newPassword);
+      addToast("success", "Password changed successfully");
+      setShowChangePassword(false);
+      setPasswordData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err: any) {
+      addToast(
+        "error",
+        err.response?.data?.detail || "Failed to change password",
       );
     }
   };
@@ -248,13 +304,22 @@ const MyProfile = () => {
                 </button>
               </>
             ) : (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
-              >
-                <Edit className="w-4 h-4" />
-                Edit Profile
-              </button>
+              <>
+                <button
+                  onClick={() => setShowChangePassword(true)}
+                  className="px-4 py-2 border border-[#1a365d] text-[#1a365d] rounded-lg hover:bg-[#1a365d] hover:text-white flex items-center gap-2"
+                >
+                  <Lock className="w-4 h-4" />
+                  Change Password
+                </button>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Profile
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -627,10 +692,35 @@ const MyProfile = () => {
               ) : (
                 <div className="p-6 border-b">
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p className="text-yellow-800 text-sm">
-                      Your student profile has not been created yet. Please
-                      contact your teacher or admin to create your profile.
+                    <p className="text-yellow-800 text-sm mb-3">
+                      Your student profile has not been created yet. Create your
+                      profile to get started!
                     </p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          // Create an empty profile - student can fill details later
+                          await useStudentProfileStore
+                            .getState()
+                            .createOwnProfile({});
+                          await fetchStudentProfiles(1, 100);
+                          addToast(
+                            "success",
+                            "Profile created successfully! You can now edit your details.",
+                          );
+                        } catch (err: any) {
+                          addToast(
+                            "error",
+                            err.response?.data?.message ||
+                              "Failed to create profile",
+                          );
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create My Profile
+                    </button>
                   </div>
                 </div>
               )}
@@ -638,332 +728,609 @@ const MyProfile = () => {
           )}
 
           {/* Teacher Profile Section */}
-          {currentUser.role === "teacher" && teacherProfile && (
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Briefcase className="w-5 h-5" />
-                Professional Information
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Department
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={teacherEditData.department}
-                      onChange={(e) =>
-                        setTeacherEditData({
-                          ...teacherEditData,
-                          department: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600">
-                      {teacherProfile.department}
-                    </p>
-                  )}
-                </div>
+          {currentUser.role === "teacher" && (
+            <>
+              {teacherProfile ? (
+                <div className="p-6 border-b">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <Briefcase className="w-5 h-5" />
+                    Professional Information
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Department
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={teacherEditData.department}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              department: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.department}
+                        </p>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject Specialization
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={teacherEditData.subject_specialization}
-                      onChange={(e) =>
-                        setTeacherEditData({
-                          ...teacherEditData,
-                          subject_specialization: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600">
-                      {teacherProfile.subject_specialization}
-                    </p>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Subject Specialization
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={teacherEditData.subject_specialization}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              subject_specialization: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.subject_specialization}
+                        </p>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Qualification
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={teacherEditData.qualification}
-                      onChange={(e) =>
-                        setTeacherEditData({
-                          ...teacherEditData,
-                          qualification: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600">
-                      {teacherProfile.qualification}
-                    </p>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Qualification
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={teacherEditData.qualification}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              qualification: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.qualification}
+                        </p>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Experience (Years)
-                  </label>
-                  {isEditing ? (
-                    <input
-                      type="number"
-                      value={teacherEditData.experience_years}
-                      onChange={(e) =>
-                        setTeacherEditData({
-                          ...teacherEditData,
-                          experience_years: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                    />
-                  ) : (
-                    <p className="text-sm text-gray-600">
-                      {teacherProfile.experience_years} years
-                    </p>
-                  )}
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Experience (Years)
+                      </label>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={teacherEditData.experience_years}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              experience_years: parseInt(e.target.value) || 0,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.experience_years} years
+                        </p>
+                      )}
+                    </div>
 
-                {/* Read-only fields */}
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                  <div>
-                    <p className="text-xs text-gray-500">Employee Code</p>
-                    <p className="text-sm font-medium">
-                      {teacherProfile.employee_code || "Not assigned"}
-                    </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Classes Assigned
+                      </label>
+                      {isEditing ? (
+                        <textarea
+                          value={teacherEditData.classes_assigned}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              classes_assigned: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          placeholder="Enter classes you are assigned to"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.classes_assigned || "Not assigned"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Subjects Teaching
+                      </label>
+                      {isEditing ? (
+                        <textarea
+                          value={teacherEditData.subjects_teaching}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              subjects_teaching: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          placeholder="Enter subjects you are teaching"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.subjects_teaching || "Not specified"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Certifications
+                      </label>
+                      {isEditing ? (
+                        <textarea
+                          value={teacherEditData.certifications}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              certifications: e.target.value,
+                            })
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          placeholder="Enter your certifications"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.certifications || "None"}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Training Completed
+                      </label>
+                      {isEditing ? (
+                        <textarea
+                          value={teacherEditData.training_completed}
+                          onChange={(e) =>
+                            setTeacherEditData({
+                              ...teacherEditData,
+                              training_completed: e.target.value,
+                            })
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          placeholder="Enter training programs you have completed"
+                        />
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          {teacherProfile.training_completed || "None"}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Read-only fields */}
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                      <div>
+                        <p className="text-xs text-gray-500">Employee Code</p>
+                        <p className="text-sm font-medium">
+                          {teacherProfile.employee_code || "Not assigned"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Hire Date</p>
+                        <p className="text-sm font-medium">
+                          {teacherProfile.hire_date}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Employment Type</p>
+                        <p className="text-sm font-medium capitalize">
+                          {teacherProfile.employment_type.replace("_", " ")}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Hire Date</p>
-                    <p className="text-sm font-medium">
-                      {teacherProfile.hire_date}
+                </div>
+              ) : (
+                <div className="p-6 border-b">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-yellow-800 text-sm mb-3">
+                      Your teacher profile has not been created yet. Create your
+                      profile to get started!
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Employment Type</p>
-                    <p className="text-sm font-medium capitalize">
-                      {teacherProfile.employment_type.replace("_", " ")}
-                    </p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          // Create an empty profile - teacher can fill details later
+                          await useTeacherProfileStore
+                            .getState()
+                            .createOwnProfile({});
+                          await fetchTeacherProfiles(1, 100);
+                          addToast(
+                            "success",
+                            "Profile created successfully! You can now edit your details.",
+                          );
+                        } catch (err: any) {
+                          addToast(
+                            "error",
+                            err.response?.data?.message ||
+                              "Failed to create profile",
+                          );
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create My Profile
+                    </button>
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
 
           {/* Admin/Superadmin Profile Section */}
           {(currentUser.role === "admin" ||
-            currentUser.role === "superadmin") &&
-            userProfile && (
-              <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Additional Information
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Bio
-                    </label>
-                    {isEditing ? (
-                      <textarea
-                        value={userEditData.bio}
-                        onChange={(e) =>
-                          setUserEditData({
-                            ...userEditData,
-                            bio: e.target.value,
-                          })
-                        }
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-600">
-                        {userProfile.bio || "Not provided"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+            currentUser.role === "superadmin") && (
+            <>
+              {userProfile ? (
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Additional Information
+                  </h3>
+                  <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number
+                        Bio
                       </label>
                       {isEditing ? (
-                        <input
-                          type="tel"
-                          value={userEditData.phone_number}
+                        <textarea
+                          value={userEditData.bio}
                           onChange={(e) =>
                             setUserEditData({
                               ...userEditData,
-                              phone_number: e.target.value,
+                              bio: e.target.value,
                             })
                           }
+                          rows={3}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
-                          {userProfile.phone_number || "Not provided"}
+                          {userProfile.bio || "Not provided"}
                         </p>
                       )}
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Emergency Contact
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="tel"
-                          value={userEditData.emergency_contact}
-                          onChange={(e) =>
-                            setUserEditData({
-                              ...userEditData,
-                              emergency_contact: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600">
-                          {userProfile.emergency_contact || "Not provided"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Phone Number
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="tel"
+                            value={userEditData.phone_number}
+                            onChange={(e) =>
+                              setUserEditData({
+                                ...userEditData,
+                                phone_number: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.phone_number || "Not provided"}
+                          </p>
+                        )}
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Address
-                    </label>
-                    {isEditing ? (
-                      <textarea
-                        value={userEditData.address}
-                        onChange={(e) =>
-                          setUserEditData({
-                            ...userEditData,
-                            address: e.target.value,
-                          })
-                        }
-                        rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-600">
-                        {userProfile.address || "Not provided"}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nationality
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          value={userEditData.nationality}
-                          onChange={(e) =>
-                            setUserEditData({
-                              ...userEditData,
-                              nationality: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600">
-                          {userProfile.nationality || "Not provided"}
-                        </p>
-                      )}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Emergency Contact
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="tel"
+                            value={userEditData.emergency_contact}
+                            onChange={(e) =>
+                              setUserEditData({
+                                ...userEditData,
+                                emergency_contact: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.emergency_contact || "Not provided"}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Blood Group
+                        Address
                       </label>
                       {isEditing ? (
-                        <input
-                          type="text"
-                          value={userEditData.blood_group}
+                        <textarea
+                          value={userEditData.address}
                           onChange={(e) =>
                             setUserEditData({
                               ...userEditData,
-                              blood_group: e.target.value,
+                              address: e.target.value,
                             })
                           }
+                          rows={2}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
-                          {userProfile.blood_group || "Not provided"}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Facebook URL
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="url"
-                          value={userEditData.facebook_url}
-                          onChange={(e) =>
-                            setUserEditData({
-                              ...userEditData,
-                              facebook_url: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600">
-                          {userProfile.facebook_url || "Not provided"}
+                          {userProfile.address || "Not provided"}
                         </p>
                       )}
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        LinkedIn URL
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="url"
-                          value={userEditData.linkedin_url}
-                          onChange={(e) =>
-                            setUserEditData({
-                              ...userEditData,
-                              linkedin_url: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
-                        />
-                      ) : (
-                        <p className="text-sm text-gray-600">
-                          {userProfile.linkedin_url || "Not provided"}
-                        </p>
-                      )}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nationality
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={userEditData.nationality}
+                            onChange={(e) =>
+                              setUserEditData({
+                                ...userEditData,
+                                nationality: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.nationality || "Not provided"}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Blood Group
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={userEditData.blood_group}
+                            onChange={(e) =>
+                              setUserEditData({
+                                ...userEditData,
+                                blood_group: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.blood_group || "Not provided"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Facebook URL
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="url"
+                            value={userEditData.facebook_url}
+                            onChange={(e) =>
+                              setUserEditData({
+                                ...userEditData,
+                                facebook_url: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.facebook_url || "Not provided"}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          LinkedIn URL
+                        </label>
+                        {isEditing ? (
+                          <input
+                            type="url"
+                            value={userEditData.linkedin_url}
+                            onChange={(e) =>
+                              setUserEditData({
+                                ...userEditData,
+                                linkedin_url: e.target.value,
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          />
+                        ) : (
+                          <p className="text-sm text-gray-600">
+                            {userProfile.linkedin_url || "Not provided"}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="p-6">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-yellow-800 text-sm mb-3">
+                      Your profile has not been created yet. Create your profile
+                      to add additional information!
+                    </p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          // Create an empty profile - user can fill details later
+                          await useUserProfileStore
+                            .getState()
+                            .createOwnProfile({});
+                          await fetchUserProfiles(1, 100);
+                          addToast(
+                            "success",
+                            "Profile created successfully! You can now edit your details.",
+                          );
+                        } catch (err: any) {
+                          addToast(
+                            "error",
+                            err.response?.data?.message ||
+                              "Failed to create profile",
+                          );
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create My Profile
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
+
+        {/* Change Password Modal */}
+        {showChangePassword && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold text-[#1a365d] flex items-center gap-2">
+                  <Lock className="w-5 h-5" />
+                  Change Password
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowChangePassword(false);
+                    setPasswordData({
+                      oldPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
+                    });
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.oldPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        oldPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:outline-none"
+                    placeholder="Enter current password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:outline-none"
+                    placeholder="Enter new password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:outline-none"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowChangePassword(false);
+                      setPasswordData({
+                        oldPassword: "",
+                        newPassword: "",
+                        confirmPassword: "",
+                      });
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={passwordLoading}
+                    className="flex-1 px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {passwordLoading ? "Changing..." : "Change Password"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

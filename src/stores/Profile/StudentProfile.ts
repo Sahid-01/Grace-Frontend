@@ -33,6 +33,7 @@ interface StudentProfileState {
   fetchProfileById: (id: number) => Promise<StudentProfile | null>;
   fetchByGrade: (grade: string) => Promise<StudentProfile[]>;
   createProfile: (data: Partial<StudentProfile>) => Promise<void>;
+  createOwnProfile: (data?: Partial<StudentProfile>) => Promise<void>;
   updateProfile: (id: number, data: Partial<StudentProfile>) => Promise<void>;
   deleteProfile: (id: number) => Promise<void>;
   clearError: () => void;
@@ -115,6 +116,26 @@ export const useStudentProfileStore = create<StudentProfileState>()(
         set({
           error:
             err.response?.data?.message || "Failed to create student profile",
+          loading: false,
+        });
+        throw err;
+      }
+    },
+
+    createOwnProfile: async (data: Partial<StudentProfile> = {}) => {
+      set({ loading: true, error: null });
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(studentProfileAPI.createOwn, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        set({ loading: false });
+        await get().fetchProfiles();
+      } catch (err: any) {
+        set({
+          error: err.response?.data?.message || "Failed to create your profile",
           loading: false,
         });
         throw err;

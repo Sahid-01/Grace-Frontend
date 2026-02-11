@@ -32,6 +32,7 @@ interface TeacherProfileState {
   fetchProfileById: (id: number) => Promise<TeacherProfile | null>;
   fetchBySubject: (subject: string) => Promise<TeacherProfile[]>;
   createProfile: (data: Partial<TeacherProfile>) => Promise<void>;
+  createOwnProfile: (data?: Partial<TeacherProfile>) => Promise<void>;
   updateProfile: (id: number, data: Partial<TeacherProfile>) => Promise<void>;
   deleteProfile: (id: number) => Promise<void>;
   clearError: () => void;
@@ -115,6 +116,26 @@ export const useTeacherProfileStore = create<TeacherProfileState>()(
         set({
           error:
             err.response?.data?.message || "Failed to create teacher profile",
+          loading: false,
+        });
+        throw err;
+      }
+    },
+
+    createOwnProfile: async (data: Partial<TeacherProfile> = {}) => {
+      set({ loading: true, error: null });
+      try {
+        const token = localStorage.getItem("token");
+        await axios.post(teacherProfileAPI.createOwn, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        set({ loading: false });
+        await get().fetchProfiles();
+      } catch (err: any) {
+        set({
+          error: err.response?.data?.message || "Failed to create your profile",
           loading: false,
         });
         throw err;

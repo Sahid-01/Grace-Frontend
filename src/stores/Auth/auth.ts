@@ -15,6 +15,7 @@ export interface User {
   employee_id?: string | null;
   branch?: string | null;
   branch_id?: number | null;
+  must_change_password?: boolean;
   enrolled_courses?: Array<{
     id: number;
     title: string;

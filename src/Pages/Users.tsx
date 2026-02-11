@@ -151,7 +151,8 @@ const Users = () => {
       role: formData.role,
     };
 
-    if (!isEditMode && formData.password) {
+    // Include password if provided (both create and edit mode)
+    if (formData.password) {
       userData.password = formData.password;
       userData.password_confirm = formData.password_confirm;
     }

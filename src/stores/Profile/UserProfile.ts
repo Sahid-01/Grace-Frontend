@@ -31,6 +31,7 @@ interface UserProfileState {
   fetchProfiles: (page?: number, perPage?: number) => Promise<void>;
   fetchProfileById: (id: number) => Promise<UserProfile | null>;
   createProfile: (data: Partial<UserProfile>) => Promise<void>;
+  createOwnProfile: (data?: Partial<UserProfile>) => Promise<void>;
   updateProfile: (id: number, data: Partial<UserProfile>) => Promise<void>;
   deleteProfile: (id: number) => Promise<void>;
   clearError: () => void;
@@ -93,6 +94,26 @@ export const useUserProfileStore = create<UserProfileState>()((set, get) => ({
     } catch (err: any) {
       set({
         error: err.response?.data?.message || "Failed to create profile",
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  createOwnProfile: async (data: Partial<UserProfile> = {}) => {
+    set({ loading: true, error: null });
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(userProfileAPI.createOwn, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      set({ loading: false });
+      await get().fetchProfiles();
+    } catch (err: any) {
+      set({
+        error: err.response?.data?.message || "Failed to create your profile",
         loading: false,
       });
       throw err;

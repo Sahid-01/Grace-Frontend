@@ -361,9 +361,7 @@ const Login = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => {
-                      /* Add forgot password logic */
-                    }}
+                    onClick={() => navigate("/forgot-password")}
                     className="text-xs sm:text-sm text-[#1164A3] hover:text-[#1A9641] font-medium transition-colors text-left xs:text-right"
                   >
                     Forgot password?

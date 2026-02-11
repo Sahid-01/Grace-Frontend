@@ -29,4 +29,16 @@ export const UserApi = {
 
   // POST /users/change_password/
   changePassword: `${BASE_URL}users/change_password/`,
+
+  // POST /users/force_change_password/
+  forceChangePassword: `${BASE_URL}users/force_change_password/`,
+};
+
+// Forgot Password API
+export const ForgotPasswordApi = {
+  // POST /forgot-password/request/
+  requestOTP: `${BASE_URL}forgot-password/request/`,
+
+  // POST /forgot-password/verify/
+  verifyAndReset: `${BASE_URL}forgot-password/verify/`,
 };

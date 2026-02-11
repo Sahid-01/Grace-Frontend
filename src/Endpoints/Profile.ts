@@ -5,6 +5,8 @@ export const userProfileAPI = {
   list: `${BASE_URL}user-profiles/`,
   detail: (id: number) => `${BASE_URL}user-profiles/${id}/`,
   create: `${BASE_URL}user-profiles/`,
+  myProfile: `${BASE_URL}user-profiles/my_profile/`,
+  createOwn: `${BASE_URL}user-profiles/create_own_profile/`,
   update: (id: number) => `${BASE_URL}user-profiles/${id}/`,
   delete: (id: number) => `${BASE_URL}user-profiles/${id}/`,
 };
@@ -14,6 +16,8 @@ export const studentProfileAPI = {
   list: `${BASE_URL}student-profiles/`,
   detail: (id: number) => `${BASE_URL}student-profiles/${id}/`,
   create: `${BASE_URL}student-profiles/`,
+  myProfile: `${BASE_URL}student-profiles/my_profile/`,
+  createOwn: `${BASE_URL}student-profiles/create_own_profile/`,
   update: (id: number) => `${BASE_URL}student-profiles/${id}/`,
   delete: (id: number) => `${BASE_URL}student-profiles/${id}/`,
   byGrade: (grade: string) =>
@@ -25,6 +29,8 @@ export const teacherProfileAPI = {
   list: `${BASE_URL}teacher-profiles/`,
   detail: (id: number) => `${BASE_URL}teacher-profiles/${id}/`,
   create: `${BASE_URL}teacher-profiles/`,
+  myProfile: `${BASE_URL}teacher-profiles/my_profile/`,
+  createOwn: `${BASE_URL}teacher-profiles/create_own_profile/`,
   update: (id: number) => `${BASE_URL}teacher-profiles/${id}/`,
   delete: (id: number) => `${BASE_URL}teacher-profiles/${id}/`,
   bySubject: (subject: string) =>

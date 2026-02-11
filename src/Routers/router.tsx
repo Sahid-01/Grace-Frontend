@@ -1,5 +1,6 @@
 import Layout from "@/layouts/Layout";
 import Login from "@/Pages/Login";
+import ForgotPassword from "@/Pages/ForgotPassword";
 import Dashboard from "@/Pages/Dashboard";
 import Users from "@/Pages/Users";
 import Class from "@/Pages/Classes";
@@ -7,10 +8,11 @@ import MyProfile from "@/Pages/MyProfile";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import type { ReactElement } from "react";
 import { useAuthStore } from "@/stores/Auth/auth";
+import ForceChangePassword from "@/Components/ForceChangePassword";
 
 // Protected Route Component
 const ProtectedRoute = ({ element }: { element: ReactElement }) => {
-  const { isAuthenticated, token } = useAuthStore();
+  const { isAuthenticated, token, user } = useAuthStore();
 
   // If token exists in localStorage but isAuthenticated is false,
   // it means the store is still initializing
@@ -26,6 +28,16 @@ const ProtectedRoute = ({ element }: { element: ReactElement }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Check if user must change password
+  if (user?.must_change_password) {
+    return (
+      <>
+        {element}
+        <ForceChangePassword />
+      </>
+    );
+  }
+
   return element;
 };
 
@@ -34,6 +46,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
   },
   {
     path: "/",
