@@ -75,6 +75,8 @@ const Users = () => {
   const [tempSearchQuery, setTempSearchQuery] = useState("");
   const [tempEmployeeId, setTempEmployeeId] = useState("");
   const [tempStudentId, setTempStudentId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastSubmitTime, setLastSubmitTime] = useState(0);
 
   useEffect(() => {
     if (!hasFetched.current) {
@@ -132,6 +134,15 @@ const Users = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent multiple submissions with debounce (2 seconds)
+    const now = Date.now();
+    if (isSubmitting || loading || (now - lastSubmitTime < 2000)) {
+      console.log("Submission blocked - already processing");
+      return;
+    }
+
+    setLastSubmitTime(now);
+
     if (!currentUser?.role) {
       addToast("error", "Unable to determine your role");
       return;
@@ -142,6 +153,8 @@ const Users = () => {
       addToast("error", "Passwords don't match");
       return;
     }
+
+    setIsSubmitting(true);
 
     const userData: any = {
       username: formData.username,
@@ -177,57 +190,66 @@ const Users = () => {
     // Clear previous errors
     clearError();
 
-    if (isEditMode && editingUserId) {
-      await updateUser(editingUserId, userData);
-    } else {
-      await createUser(userData, currentUser.role);
-    }
-
-    // Check error state after operation completes
-    setTimeout(() => {
-      const currentError = useUsersStore.getState().error;
-
-      if (!currentError) {
-        addToast(
-          "success",
-          isEditMode
-            ? "User updated successfully!"
-            : "User created successfully!",
-        );
-        setIsModalOpen(false);
-        setIsEditMode(false);
-        setEditingUserId(null);
-        setFormData({
-          username: "",
-          email: "",
-          password: "",
-          password_confirm: "",
-          first_name: "",
-          last_name: "",
-          role: "student",
-          branch: undefined,
-          enrolled_courses: [],
-          student_id: "",
-          employee_id: "",
-        });
-        // Refresh current page
-        const filters = {
-          search: searchQuery,
-          role: roleFilter,
-          student_id: studentIdFilter,
-          employee_id: employeeIdFilter,
-        };
-        fetchUsers(currentPage, perPage, filters);
+    try {
+      if (isEditMode && editingUserId) {
+        await updateUser(editingUserId, userData);
       } else {
-        // Show error as toast notification
-        addToast("error", currentError);
+        await createUser(userData, currentUser.role);
       }
-    }, 100);
+
+      // Check error state after operation completes
+      setTimeout(() => {
+        const currentError = useUsersStore.getState().error;
+
+        if (!currentError) {
+          addToast(
+            "success",
+            isEditMode
+              ? "User updated successfully!"
+              : "User created successfully!",
+          );
+          setIsModalOpen(false);
+          setIsEditMode(false);
+          setEditingUserId(null);
+          setFormData({
+            username: "",
+            email: "",
+            password: "",
+            password_confirm: "",
+            first_name: "",
+            last_name: "",
+            role: "student",
+            branch: undefined,
+            enrolled_courses: [],
+            student_id: "",
+            employee_id: "",
+          });
+          // Refresh current page
+          const filters = {
+            search: searchQuery,
+            role: roleFilter,
+            student_id: studentIdFilter,
+            employee_id: employeeIdFilter,
+          };
+          fetchUsers(currentPage, perPage, filters);
+        } else {
+          // Show error as toast notification
+          addToast("error", currentError);
+        }
+        
+        setIsSubmitting(false);
+      }, 100);
+    } catch (error) {
+      // Handle any unexpected errors
+      setIsSubmitting(false);
+    }
   };
 
   const handleEdit = (user: any) => {
     setIsEditMode(true);
     setEditingUserId(user.id);
+    setIsSubmitting(false);
+    setLastSubmitTime(0);
     setFormData({
       username: user.username,
       email: user.email,
@@ -248,6 +270,8 @@ const Users = () => {
   const handleAddNew = () => {
     setIsEditMode(false);
     setEditingUserId(null);
+    setIsSubmitting(false);
+    setLastSubmitTime(0);
     setFormData({
       username: "",
       email: "",
@@ -883,6 +907,7 @@ const Users = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <fieldset disabled={isSubmitting || loading} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1266,13 +1291,15 @@ const Users = () => {
                 </div>
               )}
 
+              </fieldset>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-[#1a365d] text-white px-4 py-2 rounded-lg hover:bg-[#2c5282] transition font-medium disabled:opacity-50"
+                  disabled={loading || isSubmitting}
+                  className="flex-1 bg-[#1a365d] text-white px-4 py-2 rounded-lg hover:bg-[#2c5282] transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading
+                  {loading || isSubmitting
                     ? isEditMode
                       ? "Updating..."
                       : "Creating..."
@@ -1286,8 +1313,10 @@ const Users = () => {
                     setIsModalOpen(false);
                     setIsEditMode(false);
                     setEditingUserId(null);
+                    setIsSubmitting(false);
                   }}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                  disabled={loading || isSubmitting}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
