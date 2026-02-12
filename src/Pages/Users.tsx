@@ -218,9 +218,10 @@ const Users = () => {
           employee_id: employeeIdFilter,
         };
         fetchUsers(currentPage, perPage, filters);
+      } else {
+        // Show error as toast notification
+        addToast("error", currentError);
       }
-      // If there's an error, it will show in the modal (error state is already set by the store)
-      // No need to show toast for errors - user can see it in the modal and fix it
     }, 100);
   };
 
@@ -1262,12 +1263,6 @@ const Users = () => {
                       </span>
                     )}
                   </p>
-                </div>
-              )}
-
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
 

@@ -256,11 +256,31 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
         loading: false,
       }));
     } catch (err: any) {
+      // Handle validation errors from Django
+      const errorData = err.response?.data;
+      let errorMessage = "Failed to create user";
+
+      if (errorData?.errors) {
+        // Format: { errors: { password: ["error1", "error2"], ... } }
+        const errors = errorData.errors;
+        const errorMessages: string[] = [];
+        
+        Object.keys(errors).forEach((field) => {
+          const fieldErrors = errors[field];
+          if (Array.isArray(fieldErrors)) {
+            fieldErrors.forEach((msg) => errorMessages.push(`${field}: ${msg}`));
+          }
+        });
+        
+        errorMessage = errorMessages.join("; ");
+      } else if (errorData?.detail) {
+        errorMessage = errorData.detail;
+      } else if (errorData?.message) {
+        errorMessage = errorData.message;
+      }
+
       set({
-        error:
-          err.response?.data?.detail ||
-          err.response?.data?.message ||
-          "Failed to create user",
+        error: errorMessage,
         loading: false,
       });
     }
@@ -283,8 +303,31 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
         loading: false,
       }));
     } catch (err: any) {
+      // Handle validation errors from Django
+      const errorData = err.response?.data;
+      let errorMessage = "Failed to update user";
+
+      if (errorData?.errors) {
+        // Format: { errors: { password: ["error1", "error2"], ... } }
+        const errors = errorData.errors;
+        const errorMessages: string[] = [];
+        
+        Object.keys(errors).forEach((field) => {
+          const fieldErrors = errors[field];
+          if (Array.isArray(fieldErrors)) {
+            fieldErrors.forEach((msg) => errorMessages.push(`${field}: ${msg}`));
+          }
+        });
+        
+        errorMessage = errorMessages.join("; ");
+      } else if (errorData?.detail) {
+        errorMessage = errorData.detail;
+      } else if (errorData?.message) {
+        errorMessage = errorData.message;
+      }
+
       set({
-        error: err.response?.data?.detail || "Failed to update user",
+        error: errorMessage,
         loading: false,
       });
     }
