@@ -765,7 +765,7 @@ const Class = () => {
                         onClick={() => {
                           window.open(selectedLesson.video_url, "_blank");
                         }}
-                        className="w-full flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer"
+                        className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200 hover:bg-blue-100 transition cursor-pointer w-full"
                       >
                         <PlayCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
                         <div className="flex-1 text-left">
@@ -786,7 +786,7 @@ const Class = () => {
                         onClick={() => {
                           window.open(selectedLesson.pdf_url, "_blank");
                         }}
-                        className="w-full flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition cursor-pointer"
+                        className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200 hover:bg-green-100 transition cursor-pointer w-full"
                       >
                         <FileText className="w-5 h-5 text-green-600 flex-shrink-0" />
                         <div className="flex-1 text-left">
@@ -855,22 +855,26 @@ const Class = () => {
 
               {selectedLesson.file_url ? (
                 <div className="bg-black rounded-lg overflow-hidden shadow-2xl">
-                  <video
-                    controls
-                    className="w-full"
-                    autoPlay
-                    preload="metadata"
-                  >
-                    <source
-                      src={selectedLesson.file_url}
-                      type={`video/${selectedLesson.file_type || "mp4"}`}
-                    />
-                    <source src={selectedLesson.file_url} type="video/mp4" />
-                    <source src={selectedLesson.file_url} type="video/webm" />
-                    <p className="text-white p-4">
-                      Your browser does not support the video tag.
-                    </p>
-                  </video>
+                  <div className="relative w-full aspect-video bg-black">
+                    <video
+                      controls
+                      controlsList="nodownload"
+                      className="w-full h-full object-contain"
+                      autoPlay
+                      preload="metadata"
+                      onContextMenu={(e) => e.preventDefault()}
+                    >
+                      <source
+                        src={selectedLesson.file_url}
+                        type={`video/${selectedLesson.file_type || "mp4"}`}
+                      />
+                      <source src={selectedLesson.file_url} type="video/mp4" />
+                      <source src={selectedLesson.file_url} type="video/webm" />
+                      <p className="text-white p-4">
+                        Your browser does not support the video tag.
+                      </p>
+                    </video>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-gray-800 rounded-lg p-12 text-center">

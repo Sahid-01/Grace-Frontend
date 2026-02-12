@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import { LessonProgressApi } from "@/Endpoints/Classes/LessonProgress";
+import { useAuthStore } from "@/stores/Auth/auth";
 
 export interface LessonProgressData {
   id: number;
@@ -63,14 +64,19 @@ export const useLessonProgressStore = create<LessonProgressState>()(
 
     updateProgress: async (lessonId: number, isCompleted: boolean) => {
       try {
+        // Get user from auth store to ensure proper user identification
+        const { user } = useAuthStore.getState();
+        const userId = user?.id;
+
         const token = localStorage.getItem("token");
 
-        // Create or update progress
+        // Create or update progress - include user_id if available
         const res = await axios.post(
           LessonProgressApi.createProgress,
           {
             lesson: lessonId,
             is_completed: isCompleted,
+            ...(userId && { user: userId }),
           },
           {
             headers: {
