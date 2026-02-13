@@ -52,7 +52,9 @@ export const ToastContainer = ({ toasts, onRemove }: ToastContainerProps) => {
             className={`flex items-start gap-3 p-4 rounded-lg shadow-xl backdrop-blur-sm border animate-slide-in ${getToastStyles(toast.type)}`}
           >
             {getToastIcon(toast.type)}
-            <p className="flex-1 text-sm font-medium break-words">{toast.message}</p>
+            <p className="flex-1 text-sm font-medium break-words">
+              {toast.message}
+            </p>
             <button
               onClick={() => onRemove(toast.id)}
               className="flex-shrink-0 p-0.5 hover:bg-black/10 rounded transition"

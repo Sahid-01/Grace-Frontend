@@ -51,7 +51,7 @@ const Sidebar = ({
 
   return (
     <div
-      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-sm transition-all duration-300 ease-in-out ${
+      className={`hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-sm transition-all duration-300 ease-in-out ${
         isCollapsed ? "w-20" : "w-64"
       } border-r border-gray-200 z-30 overflow-hidden`}
     >

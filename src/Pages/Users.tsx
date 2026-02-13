@@ -136,7 +136,7 @@ const Users = () => {
 
     // Prevent multiple submissions with debounce (2 seconds)
     const now = Date.now();
-    if (isSubmitting || loading || (now - lastSubmitTime < 2000)) {
+    if (isSubmitting || loading || now - lastSubmitTime < 2000) {
       console.log("Submission blocked - already processing");
       return;
     }
@@ -236,7 +236,7 @@ const Users = () => {
           // Show error as toast notification
           addToast("error", currentError);
         }
-        
+
         setIsSubmitting(false);
       }, 100);
     } catch (error) {
@@ -907,390 +907,392 @@ const Users = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <fieldset disabled={isSubmitting || loading} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Username <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={formData.first_name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="last_name"
-                    value={formData.last_name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password{" "}
-                    {!isEditMode && <span className="text-red-500">*</span>}
-                    {isEditMode && (
-                      <span className="text-gray-500 text-xs">
-                        (Leave blank to keep current)
-                      </span>
-                    )}
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required={!isEditMode}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password{" "}
-                    {!isEditMode && <span className="text-red-500">*</span>}
-                  </label>
-                  <input
-                    type="password"
-                    name="password_confirm"
-                    value={formData.password_confirm}
-                    onChange={handleInputChange}
-                    required={!isEditMode}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Role <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] capitalize"
-                  >
-                    {getAvailableRoles().map((role) => (
-                      <option key={role} value={role} className="capitalize">
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Student ID
-                  </label>
-                  <input
-                    type="text"
-                    name="student_id"
-                    value={formData.student_id}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Employee ID
-                  </label>
-                  <input
-                    type="text"
-                    name="employee_id"
-                    value={formData.employee_id}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  />
-                </div>
-              </div>
-
-              {/* Branch Selection */}
-              {isSuperadmin && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Branch{" "}
-                    {formData.role !== "superadmin" && (
-                      <span className="text-red-500">*</span>
-                    )}
-                  </label>
-                  <select
-                    name="branch"
-                    value={formData.branch || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        branch: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
-                        enrolled_courses: [], // Reset enrolled courses when branch changes
-                      })
-                    }
-                    required={formData.role !== "superadmin"}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
-                  >
-                    <option value="">Select Branch</option>
-                    {branches.map((branch) => (
-                      <option key={branch.id} value={branch.id}>
-                        {branch.name} ({branch.code})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formData.role === "superadmin"
-                      ? "Superadmin users don't need branch assignment"
-                      : "Select which branch this user belongs to"}
-                  </p>
-                </div>
-              )}
-
-              {isAdmin && currentUser?.branch_id && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Branch <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
+              <fieldset
+                disabled={isSubmitting || loading}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Username <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
-                      value={currentUser?.branch || "Your Branch"}
-                      disabled
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                     />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <Building2 className="w-5 h-5 text-purple-600" />
-                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Users will be created for your branch:{" "}
-                    <span className="font-semibold text-purple-700">
-                      {currentUser?.branch}
-                    </span>
-                  </p>
-                </div>
-              )}
 
-              {isTeacher && currentUser?.branch_id && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Branch <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      First Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
-                      value={currentUser?.branch || "Your Branch"}
-                      disabled
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                     />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <Building2 className="w-5 h-5 text-purple-600" />
-                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Students will be created for your branch:{" "}
-                    <span className="font-semibold text-purple-700">
-                      {currentUser?.branch}
-                    </span>
-                  </p>
-                </div>
-              )}
 
-              {/* Show branch info for students (read-only when editing) */}
-              {formData.role === "student" && isEditMode && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Branch
-                  </label>
-                  <div className="relative">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
-                      value={
-                        isSuperadmin
-                          ? branches.find((b) => b.id === formData.branch)
-                              ?.name || "Not assigned"
-                          : currentUser?.branch || "Not assigned"
-                      }
-                      disabled
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
                     />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <Building2 className="w-5 h-5 text-purple-600" />
-                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Student's branch assignment (cannot be changed after
-                    creation)
-                  </p>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Password{" "}
+                      {!isEditMode && <span className="text-red-500">*</span>}
+                      {isEditMode && (
+                        <span className="text-gray-500 text-xs">
+                          (Leave blank to keep current)
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required={!isEditMode}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Confirm Password{" "}
+                      {!isEditMode && <span className="text-red-500">*</span>}
+                    </label>
+                    <input
+                      type="password"
+                      name="password_confirm"
+                      value={formData.password_confirm}
+                      onChange={handleInputChange}
+                      required={!isEditMode}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Role <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] capitalize"
+                    >
+                      {getAvailableRoles().map((role) => (
+                        <option key={role} value={role} className="capitalize">
+                          {role}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Student ID
+                    </label>
+                    <input
+                      type="text"
+                      name="student_id"
+                      value={formData.student_id}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Employee ID
+                    </label>
+                    <input
+                      type="text"
+                      name="employee_id"
+                      value={formData.employee_id}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    />
+                  </div>
                 </div>
-              )}
 
-              {/* Enrolled Courses (for students only) */}
-              {formData.role === "student" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Enrolled Courses
-                  </label>
-                  <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto bg-gray-50">
-                    {(() => {
-                      // Determine which branch to filter by
-                      let branchToFilter = null;
-
-                      if (isSuperadmin) {
-                        branchToFilter = formData.branch;
-                      } else if (isAdmin || isTeacher) {
-                        // For admin and teacher, use their branch_id
-                        branchToFilter = currentUser?.branch_id;
+                {/* Branch Selection */}
+                {isSuperadmin && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Branch{" "}
+                      {formData.role !== "superadmin" && (
+                        <span className="text-red-500">*</span>
+                      )}
+                    </label>
+                    <select
+                      name="branch"
+                      value={formData.branch || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          branch: e.target.value
+                            ? Number(e.target.value)
+                            : undefined,
+                          enrolled_courses: [], // Reset enrolled courses when branch changes
+                        })
                       }
-
-                      const availableCourses = courses.filter((c) => {
-                        if (!c.is_active) return false;
-                        if (branchToFilter) {
-                          return c.branch === branchToFilter;
-                        }
-                        return false;
-                      });
-
-                      if (!branchToFilter) {
-                        return (
-                          <div className="text-center py-4">
-                            <p className="text-sm text-gray-500 mb-2">
-                              {isSuperadmin
-                                ? "Please select a branch first"
-                                : "Loading branch information..."}
-                            </p>
-                            {isAdmin && (
-                              <p className="text-xs text-gray-400">
-                                Your branch:{" "}
-                                {currentUser?.branch || "Not assigned"}
-                              </p>
-                            )}
-                          </div>
-                        );
-                      }
-
-                      if (availableCourses.length === 0) {
-                        return (
-                          <div className="text-center py-4">
-                            <p className="text-sm text-gray-500 mb-2">
-                              No courses available for this branch
-                            </p>
-                            <p className="text-xs text-gray-400">
-                              Branch ID: {branchToFilter}
-                            </p>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <div className="space-y-2">
-                          {availableCourses.map((course) => (
-                            <label
-                              key={course.id}
-                              className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={formData.enrolled_courses.includes(
-                                  course.id,
-                                )}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFormData({
-                                      ...formData,
-                                      enrolled_courses: [
-                                        ...formData.enrolled_courses,
-                                        course.id,
-                                      ],
-                                    });
-                                  } else {
-                                    setFormData({
-                                      ...formData,
-                                      enrolled_courses:
-                                        formData.enrolled_courses.filter(
-                                          (id) => id !== course.id,
-                                        ),
-                                    });
-                                  }
-                                }}
-                                className="w-4 h-4 text-[#1a365d] border-gray-300 rounded focus:ring-[#1a365d]"
-                              />
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <BookOpen className="w-4 h-4 text-gray-500" />
-                                  <span className="text-sm font-medium text-gray-800">
-                                    {course.title}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
-                                    {course.course_type}
-                                  </span>
-                                  {course.branch_name && (
-                                    <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded flex items-center gap-1">
-                                      <Building2 className="w-3 h-3" />
-                                      {course.branch_name}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      );
-                    })()}
+                      required={formData.role !== "superadmin"}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    >
+                      <option value="">Select Branch</option>
+                      {branches.map((branch) => (
+                        <option key={branch.id} value={branch.id}>
+                          {branch.name} ({branch.code})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.role === "superadmin"
+                        ? "Superadmin users don't need branch assignment"
+                        : "Select which branch this user belongs to"}
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Select courses this student will be enrolled in
-                    {(isAdmin || isTeacher) && currentUser?.branch && (
+                )}
+
+                {isAdmin && currentUser?.branch_id && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Branch <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={currentUser?.branch || "Your Branch"}
+                        disabled
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <Building2 className="w-5 h-5 text-purple-600" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Users will be created for your branch:{" "}
                       <span className="font-semibold text-purple-700">
-                        {" "}
-                        (from {currentUser.branch})
+                        {currentUser?.branch}
                       </span>
-                    )}
-                  </p>
-                </div>
-              )}
+                    </p>
+                  </div>
+                )}
 
+                {isTeacher && currentUser?.branch_id && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Branch <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={currentUser?.branch || "Your Branch"}
+                        disabled
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <Building2 className="w-5 h-5 text-purple-600" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Students will be created for your branch:{" "}
+                      <span className="font-semibold text-purple-700">
+                        {currentUser?.branch}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Show branch info for students (read-only when editing) */}
+                {formData.role === "student" && isEditMode && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Branch
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={
+                          isSuperadmin
+                            ? branches.find((b) => b.id === formData.branch)
+                                ?.name || "Not assigned"
+                            : currentUser?.branch || "Not assigned"
+                        }
+                        disabled
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                      />
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <Building2 className="w-5 h-5 text-purple-600" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Student's branch assignment (cannot be changed after
+                      creation)
+                    </p>
+                  </div>
+                )}
+
+                {/* Enrolled Courses (for students only) */}
+                {formData.role === "student" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Enrolled Courses
+                    </label>
+                    <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto bg-gray-50">
+                      {(() => {
+                        // Determine which branch to filter by
+                        let branchToFilter = null;
+
+                        if (isSuperadmin) {
+                          branchToFilter = formData.branch;
+                        } else if (isAdmin || isTeacher) {
+                          // For admin and teacher, use their branch_id
+                          branchToFilter = currentUser?.branch_id;
+                        }
+
+                        const availableCourses = courses.filter((c) => {
+                          if (!c.is_active) return false;
+                          if (branchToFilter) {
+                            return c.branch === branchToFilter;
+                          }
+                          return false;
+                        });
+
+                        if (!branchToFilter) {
+                          return (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-gray-500 mb-2">
+                                {isSuperadmin
+                                  ? "Please select a branch first"
+                                  : "Loading branch information..."}
+                              </p>
+                              {isAdmin && (
+                                <p className="text-xs text-gray-400">
+                                  Your branch:{" "}
+                                  {currentUser?.branch || "Not assigned"}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+
+                        if (availableCourses.length === 0) {
+                          return (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-gray-500 mb-2">
+                                No courses available for this branch
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                Branch ID: {branchToFilter}
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-2">
+                            {availableCourses.map((course) => (
+                              <label
+                                key={course.id}
+                                className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer transition"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={formData.enrolled_courses.includes(
+                                    course.id,
+                                  )}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setFormData({
+                                        ...formData,
+                                        enrolled_courses: [
+                                          ...formData.enrolled_courses,
+                                          course.id,
+                                        ],
+                                      });
+                                    } else {
+                                      setFormData({
+                                        ...formData,
+                                        enrolled_courses:
+                                          formData.enrolled_courses.filter(
+                                            (id) => id !== course.id,
+                                          ),
+                                      });
+                                    }
+                                  }}
+                                  className="w-4 h-4 text-[#1a365d] border-gray-300 rounded focus:ring-[#1a365d]"
+                                />
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm font-medium text-gray-800">
+                                      {course.title}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                                      {course.course_type}
+                                    </span>
+                                    {course.branch_name && (
+                                      <span className="text-xs bg-purple-50 text-purple-700 px-2 py-0.5 rounded flex items-center gap-1">
+                                        <Building2 className="w-3 h-3" />
+                                        {course.branch_name}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Select courses this student will be enrolled in
+                      {(isAdmin || isTeacher) && currentUser?.branch && (
+                        <span className="font-semibold text-purple-700">
+                          {" "}
+                          (from {currentUser.branch})
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
               </fieldset>
 
               <div className="flex gap-3 pt-4">

@@ -264,14 +264,16 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
         // Format: { errors: { password: ["error1", "error2"], ... } }
         const errors = errorData.errors;
         const errorMessages: string[] = [];
-        
+
         Object.keys(errors).forEach((field) => {
           const fieldErrors = errors[field];
           if (Array.isArray(fieldErrors)) {
-            fieldErrors.forEach((msg) => errorMessages.push(`${field}: ${msg}`));
+            fieldErrors.forEach((msg) =>
+              errorMessages.push(`${field}: ${msg}`),
+            );
           }
         });
-        
+
         errorMessage = errorMessages.join("; ");
       } else if (errorData?.detail) {
         errorMessage = errorData.detail;
@@ -311,14 +313,16 @@ export const useUsersStore = create<UsersState>()((set, get) => ({
         // Format: { errors: { password: ["error1", "error2"], ... } }
         const errors = errorData.errors;
         const errorMessages: string[] = [];
-        
+
         Object.keys(errors).forEach((field) => {
           const fieldErrors = errors[field];
           if (Array.isArray(fieldErrors)) {
-            fieldErrors.forEach((msg) => errorMessages.push(`${field}: ${msg}`));
+            fieldErrors.forEach((msg) =>
+              errorMessages.push(`${field}: ${msg}`),
+            );
           }
         });
-        
+
         errorMessage = errorMessages.join("; ");
       } else if (errorData?.detail) {
         errorMessage = errorData.detail;

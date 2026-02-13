@@ -1,17 +1,29 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuthStore } from "@/stores/Auth/auth";
-import { ChevronDown, User, LogOut } from "lucide-react";
+import {
+  ChevronDown,
+  User,
+  LogOut,
+  Menu,
+  X,
+  LayoutDashboard,
+  FileText,
+  Users,
+} from "lucide-react";
 import logo from "@/assets/logo1.png";
 // import logo1 from "@/assets/logo.png";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
 
-  // Close dropdown when clicking outside
+  // Close dropdown and mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -19,6 +31,12 @@ const Navbar = () => {
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
+      }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
       }
     };
 
@@ -51,10 +69,56 @@ const Navbar = () => {
     return name.substring(0, 2).toUpperCase();
   };
 
+  // Menu items for mobile navigation
+  const menuItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: <LayoutDashboard className="w-5 h-5" />,
+    },
+    {
+      name: "Users",
+      path: "/users",
+      icon: <Users className="w-5 h-5" />,
+      hideForRoles: ["student"],
+    },
+    {
+      name: "Classes",
+      path: "/classes",
+      icon: <FileText className="w-5 h-5" />,
+    },
+    {
+      name: "My Profile",
+      path: "/profile",
+      icon: <Users className="w-5 h-5" />,
+      hideForRoles: [],
+    },
+  ];
+
+  // Filter menu items based on user role
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.hideForRoles && user?.role) {
+      return !item.hideForRoles.includes(user.role.toLowerCase());
+    }
+    return true;
+  });
+
   return (
     <nav className="bg-gradient-to-r from-[#1164A3] to-[#1A9641] shadow-lg border-b border-[#0d5189] sticky top-0 z-50">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Hamburger Menu Button (Mobile Only) */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1164A3] transition-all duration-200"
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
+
           {/* Logo/Brand */}
           <div className="flex items-center space-x-3">
             <div className="flex items-center gap-3">
@@ -175,6 +239,53 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div
+          ref={mobileMenuRef}
+          className="lg:hidden absolute top-16 left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-40"
+        >
+          <nav className="p-4">
+            <ul className="space-y-2">
+              {filteredMenuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? "bg-gradient-to-r from-[#1164A3] to-[#1A9641] text-white shadow-md"
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-[#1164A3]/10 hover:to-[#1A9641]/10"
+                      }`}
+                    >
+                      <span
+                        className={`transition-all duration-200 ${
+                          isActive ? "text-white" : "text-[#1164A3]"
+                        }`}
+                      >
+                        {item.icon}
+                      </span>
+                      <span
+                        className={`font-medium transition-all duration-200 ${
+                          isActive ? "text-white" : "text-gray-700"
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+                      {isActive && (
+                        <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+      )}
     </nav>
   );
 };
