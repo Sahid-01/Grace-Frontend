@@ -440,7 +440,7 @@ const Users = () => {
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-t-[#1a365d] border-r-[#2c5282] animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-[#f77f00] border-r-[#ffa040] animate-spin"></div>
           </div>
           <p className="text-gray-700 font-semibold text-lg">
             Loading users...
@@ -455,7 +455,7 @@ const Users = () => {
     <div className="p-4 sm:p-6 lg:p-8">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
+      <div className="bg-[#f77f00] rounded-lg shadow-md p-6 mb-6 text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
@@ -466,7 +466,7 @@ const Users = () => {
                 User Management
               </h1>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-blue-100">Manage all users in the system</p>
+                <p className="text-orange-100">Manage all users in the system</p>
                 {(isAdmin || currentUser?.role === "teacher") &&
                   currentUser?.branch && (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-white/20 rounded-full text-xs font-semibold">
@@ -479,7 +479,7 @@ const Users = () => {
           </div>
           <button
             onClick={handleAddNew}
-            className="flex items-center gap-2 bg-white text-[#1a365d] px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all font-semibold shadow-sm"
+            className="flex items-center gap-2 bg-white text-[#f77f00] px-4 py-2.5 rounded-lg hover:bg-orange-50 transition-all font-semibold shadow-sm"
           >
             <Plus className="w-5 h-5" />
             Add New User
@@ -505,7 +505,7 @@ const Users = () => {
         <div className="p-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-[#1a365d]" />
+              <Filter className="w-4 h-4 text-[#f77f00]" />
               <h3 className="text-sm font-semibold text-gray-800">Filters</h3>
             </div>
             {(searchQuery ||
@@ -532,7 +532,7 @@ const Users = () => {
                 value={tempSearchQuery}
                 onChange={(e) => setTempSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
               />
             </div>
 
@@ -541,7 +541,7 @@ const Users = () => {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d] capitalize"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00] capitalize"
               >
                 <option value="all">All Roles</option>
                 <option value="admin">Admin</option>
@@ -578,7 +578,7 @@ const Users = () => {
             <div>
               <button
                 onClick={applyFilters}
-                className="w-full px-3 py-2 text-sm bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-all font-medium flex items-center justify-center gap-2"
+                className="w-full px-3 py-2 text-sm bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] transition-all font-medium flex items-center justify-center gap-2"
               >
                 <Search className="w-4 h-4" />
                 Search

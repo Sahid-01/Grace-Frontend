@@ -66,7 +66,7 @@ const Dashboard = () => {
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-t-[#1a365d] border-r-[#2c5282] animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-[#f77f00] border-r-[#ffa040] animate-spin"></div>
           </div>
           <p className="text-gray-800 font-semibold text-lg">
             Loading Dashboard...
@@ -110,7 +110,7 @@ const Dashboard = () => {
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-colors shadow-sm font-semibold"
+            className="px-6 py-3 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] transition-colors shadow-sm font-semibold"
           >
             Retry
           </button>
@@ -122,7 +122,7 @@ const Dashboard = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-8 mb-8 text-white">
+      <div className="bg-[#f77f00] rounded-lg shadow-md p-8 mb-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
@@ -131,7 +131,7 @@ const Dashboard = () => {
                 ? `${user.first_name} ${user.last_name}`
                 : user?.full_name || user?.name || user?.username || "User"}
             </h1>
-            <p className="text-blue-100 text-lg">
+            <p className="text-orange-100 text-lg">
               {user?.role === "student"
                 ? "Student Dashboard"
                 : user?.role === "teacher"
@@ -156,8 +156,8 @@ const Dashboard = () => {
               className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#1a365d]/10 rounded-lg flex items-center justify-center group-hover:bg-[#1a365d]/20 transition-colors">
-                  <Users className="w-6 h-6 text-[#1a365d]" />
+                <div className="w-12 h-12 bg-[#f77f00]/10 rounded-lg flex items-center justify-center group-hover:bg-[#f77f00]/20 transition-colors">
+                  <Users className="w-6 h-6 text-[#f77f00]" />
                 </div>
                 <Award className="w-5 h-5 text-gray-400" />
               </div>
@@ -167,7 +167,7 @@ const Dashboard = () => {
               <p className="text-3xl font-bold text-gray-900">
                 {totalStudents}
               </p>
-              <p className="text-xs text-[#1a365d] mt-3 font-medium">
+              <p className="text-xs text-[#f77f00] mt-3 font-medium">
                 View all students →
               </p>
             </button>
@@ -178,8 +178,8 @@ const Dashboard = () => {
               className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#2c5282]/10 rounded-lg flex items-center justify-center group-hover:bg-[#2c5282]/20 transition-colors">
-                  <Users className="w-6 h-6 text-[#2c5282]" />
+                <div className="w-12 h-12 bg-[#ffa040]/10 rounded-lg flex items-center justify-center group-hover:bg-[#ffa040]/20 transition-colors">
+                  <Users className="w-6 h-6 text-[#ffa040]" />
                 </div>
                 <Award className="w-5 h-5 text-gray-400" />
               </div>
@@ -189,7 +189,7 @@ const Dashboard = () => {
               <p className="text-3xl font-bold text-gray-900">
                 {totalTeachers}
               </p>
-              <p className="text-xs text-[#2c5282] mt-3 font-medium">
+              <p className="text-xs text-[#ffa040] mt-3 font-medium">
                 View all teachers →
               </p>
             </button>
@@ -200,8 +200,8 @@ const Dashboard = () => {
               className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#c41e3a]/10 rounded-lg flex items-center justify-center group-hover:bg-[#c41e3a]/20 transition-colors">
-                  <BookOpen className="w-6 h-6 text-[#c41e3a]" />
+                <div className="w-12 h-12 bg-[#f77f00]/10 rounded-lg flex items-center justify-center group-hover:bg-[#f77f00]/20 transition-colors">
+                  <BookOpen className="w-6 h-6 text-[#f77f00]" />
                 </div>
                 <Award className="w-5 h-5 text-gray-400" />
               </div>
@@ -209,7 +209,7 @@ const Dashboard = () => {
                 Total Courses
               </h3>
               <p className="text-3xl font-bold text-gray-900">{totalCourses}</p>
-              <p className="text-xs text-[#c41e3a] mt-3 font-medium">
+              <p className="text-xs text-[#f77f00] mt-3 font-medium">
                 View all courses →
               </p>
             </button>
@@ -220,8 +220,8 @@ const Dashboard = () => {
               className="bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-left group"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-[#1a365d]/10 rounded-lg flex items-center justify-center group-hover:bg-[#1a365d]/20 transition-colors">
-                  <GraduationCap className="w-6 h-6 text-[#1a365d]" />
+                <div className="w-12 h-12 bg-[#ffa040]/10 rounded-lg flex items-center justify-center group-hover:bg-[#ffa040]/20 transition-colors">
+                  <GraduationCap className="w-6 h-6 text-[#ffa040]" />
                 </div>
                 <Award className="w-5 h-5 text-gray-400" />
               </div>
@@ -231,7 +231,7 @@ const Dashboard = () => {
               <p className="text-3xl font-bold text-gray-900">
                 {totalSections}
               </p>
-              <p className="text-xs text-[#1a365d] mt-3 font-medium">
+              <p className="text-xs text-[#ffa040] mt-3 font-medium">
                 View details →
               </p>
             </button>
@@ -247,14 +247,14 @@ const Dashboard = () => {
                 onClick={() => navigate("/users")}
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <Users className="w-5 h-5 text-[#1a365d] mr-3" />
+                <Users className="w-5 h-5 text-[#f77f00] mr-3" />
                 <span className="font-medium text-gray-700">Manage Users</span>
               </button>
               <button
                 onClick={() => navigate("/classes")}
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <BookOpen className="w-5 h-5 text-[#2c5282] mr-3" />
+                <BookOpen className="w-5 h-5 text-[#ffa040] mr-3" />
                 <span className="font-medium text-gray-700">
                   Manage Courses
                 </span>
@@ -263,7 +263,7 @@ const Dashboard = () => {
                 onClick={() => navigate("/classes")}
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <GraduationCap className="w-5 h-5 text-[#c41e3a] mr-3" />
+                <GraduationCap className="w-5 h-5 text-[#f77f00] mr-3" />
                 <span className="font-medium text-gray-700">View Reports</span>
               </button>
             </div>
@@ -284,11 +284,11 @@ const Dashboard = () => {
               </h3>
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
-                  <BookOpen className="w-12 h-12 text-[#1a365d] mx-auto mb-3" />
+                  <BookOpen className="w-12 h-12 text-[#f77f00] mx-auto mb-3" />
                   <p className="text-gray-600">Start exploring your courses</p>
                   <button
                     onClick={() => navigate("/classes")}
-                    className="mt-4 px-6 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-colors"
+                    className="mt-4 px-6 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] transition-colors"
                   >
                     View Courses
                   </button>
@@ -302,7 +302,7 @@ const Dashboard = () => {
               </h3>
               <div className="flex items-center justify-center py-8">
                 <div className="text-center">
-                  <Award className="w-12 h-12 text-[#c41e3a] mx-auto mb-3" />
+                  <Award className="w-12 h-12 text-[#ffa040] mx-auto mb-3" />
                   <p className="text-gray-600">No recent activity</p>
                 </div>
               </div>

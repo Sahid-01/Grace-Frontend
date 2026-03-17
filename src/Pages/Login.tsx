@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/Auth/auth";
 import { useToast } from "@/hooks/useToast";
 import { ToastContainer } from "@/Components/Toast";
 // import logo from "@/assets/logo.png";
-import logo1 from "@/assets/logo1.png";
+import logo1 from "@/assets/ECAN.png";
 
 interface LoginErrors {
   username?: string;
@@ -141,7 +141,7 @@ const Login = () => {
     <div className="min-h-screen relative">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#1164A3]/90 via-[#1164A3]/85 to-[#1A9641]/90 sm:from-[#1164A3]/85 sm:via-[#1164A3]/80 sm:to-[#1A9641]/85"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#f77f00]/90 via-[#f77f00]/85 to-white/90 sm:from-[#f77f00]/85 sm:via-[#f77f00]/80 sm:to-white/85"></div>
 
       {/* Content */}
       <div className="relative z-10 w-full flex flex-col lg:flex-row min-h-screen">
@@ -176,13 +176,11 @@ const Login = () => {
 
           <div className="relative z-10">
             <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-3 lg:mb-4 leading-tight drop-shadow-lg">
-              Welcome to Your
-              <br />
-              Learning Journey
+              ECAN Learning Center
             </h2>
             <p className="text-white/95 text-base lg:text-lg mb-6 lg:mb-8 drop-shadow">
-              Access your courses, track your progress, and achieve your
-              educational goals.
+              Your trusted partner for overseas education consultancy, test
+              preparation, and career guidance.
             </p>
 
             {/* Features */}
@@ -193,10 +191,10 @@ const Login = () => {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold mb-0.5 lg:mb-1 text-sm lg:text-base">
-                    Interactive Learning
+                    Study Abroad Counseling
                   </h3>
                   <p className="text-white/90 text-xs lg:text-sm">
-                    Engage with comprehensive course materials and video lessons
+                    Get expert guidance on university selection, applications, and visa processing
                   </p>
                 </div>
               </div>
@@ -206,10 +204,10 @@ const Login = () => {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold mb-0.5 lg:mb-1 text-sm lg:text-base">
-                    Track Progress
+                    Test Preparation Courses
                   </h3>
                   <p className="text-white/90 text-xs lg:text-sm">
-                    Monitor your learning journey and achievements
+                    Prepare for IELTS, TOEFL, SAT, and other standardized exams with expert trainers
                   </p>
                 </div>
               </div>
@@ -219,18 +217,17 @@ const Login = () => {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold mb-0.5 lg:mb-1 text-sm lg:text-base">
-                    Expert Instruction
+                    Scholarship & Career Guidance
                   </h3>
                   <p className="text-white/90 text-xs lg:text-sm">
-                    Learn from qualified teachers and comprehensive resources
+                    Discover scholarship opportunities and build a roadmap for your future career
                   </p>
                 </div>
               </div>
             </div>
           </div>
-
           <div className="relative z-10 text-white/90 text-xs lg:text-sm drop-shadow">
-            © 2024 Grace International. All rights reserved.
+            © 2026 ECAN. All rights reserved.
           </div>
         </div>
 
@@ -281,10 +278,10 @@ const Login = () => {
                       placeholder="Enter your username"
                       disabled={loading}
                       autoComplete="username"
-                      className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-[#1164A3] ${
+                      className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-[#f77f00] ${
                         errors.username
                           ? "border-red-300 bg-red-50"
-                          : "border-gray-300 bg-white focus:border-[#1164A3]"
+                          : "border-gray-300 bg-white focus:border-[#f77f00]"
                       } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
                     />
                   </div>
@@ -311,17 +308,17 @@ const Login = () => {
                       placeholder="Enter your password"
                       disabled={loading}
                       autoComplete="current-password"
-                      className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-[#1164A3] ${
+                      className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 text-sm sm:text-base rounded-lg border transition-all focus:outline-none focus:ring-2 focus:ring-[#f77f00] ${
                         errors.password
                           ? "border-red-300 bg-red-50"
-                          : "border-gray-300 bg-white focus:border-[#1164A3]"
+                          : "border-gray-300 bg-white focus:border-[#f77f00]"
                       } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       disabled={loading}
-                      className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#1164A3] transition disabled:opacity-60 p-1"
+                      className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-[#f77f00] transition disabled:opacity-60 p-1"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }
@@ -350,7 +347,7 @@ const Login = () => {
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
                       disabled={loading}
-                      className="w-4 h-4 rounded border-gray-300 text-[#1164A3] focus:ring-[#1164A3] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-4 h-4 rounded border-gray-300 text-[#f77f00] focus:ring-[#f77f00] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     />
                     <label
                       htmlFor="rememberMe"
@@ -362,7 +359,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => navigate("/forgot-password")}
-                    className="text-xs sm:text-sm text-[#1164A3] hover:text-[#1A9641] font-medium transition-colors text-left xs:text-right"
+                    className="text-xs sm:text-sm text-[#f77f00] hover:text-white font-medium transition-colors text-left xs:text-right"
                   >
                     Forgot password?
                   </button>
@@ -374,8 +371,8 @@ const Login = () => {
                   disabled={loading}
                   className={`w-full py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-all flex items-center justify-center gap-2 ${
                     loading
-                      ? "bg-gradient-to-r from-[#1164A3] to-[#1A9641] text-white cursor-not-allowed opacity-70"
-                      : "bg-gradient-to-r from-[#1164A3] to-[#1A9641] hover:from-[#0d5189] hover:to-[#158037] text-white shadow-md hover:shadow-lg active:scale-95 sm:transform sm:hover:-translate-y-0.5"
+                      ? "bg-gradient-to-r from-[#f77f00] to-white text-white cursor-not-allowed opacity-70"
+                      : "bg-gradient-to-r from-[#f77f00] to-white hover:from-[#e06e00] hover:to-gray-100 border border-[#f77f00] text-white shadow-md hover:shadow-lg active:scale-95 sm:transform sm:hover:-translate-y-0.5"
                   }`}
                 >
                   {loading ? (
@@ -394,7 +391,7 @@ const Login = () => {
                 Need help? Contact{" "}
                 <a
                   href="mailto:support@graceinternational.edu"
-                  className="text-[#1164A3] hover:text-[#1A9641] font-medium transition-colors break-all"
+                  className="text-[#f77f00] hover:text-white font-medium transition-colors break-all"
                 >
                   support@graceinternational.edu
                 </a>
@@ -406,14 +403,14 @@ const Login = () => {
               By signing in, you agree to our{" "}
               <a
                 href="#"
-                className="text-white lg:text-[#1164A3] hover:text-white/80 lg:hover:text-[#1A9641] font-medium transition-colors underline lg:no-underline"
+                className="text-white lg:text-[#f77f00] hover:text-white/80 lg:hover:text-white font-medium transition-colors underline lg:no-underline"
               >
                 Terms of Service
               </a>{" "}
               and{" "}
               <a
                 href="#"
-                className="text-white lg:text-[#1164A3] hover:text-white/80 lg:hover:text-[#1A9641] font-medium transition-colors underline lg:no-underline"
+                className="text-white lg:text-[#f77f00] hover:text-white/80 lg:hover:text-white font-medium transition-colors underline lg:no-underline"
               >
                 Privacy Policy
               </a>
