@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/Auth/auth";
 import { useBranchStore } from "@/stores/Branch";
 import { useToast } from "@/hooks/useToast";
 import { ToastContainer } from "@/Components/Toast";
+import { OptimizedVideoPlayer } from "@/Components/OptimizedVideoPlayer";
 import {
   BookOpen,
   Plus,
@@ -22,7 +23,6 @@ import {
   GraduationCap,
   Building2,
 } from "lucide-react";
-
 const Class = () => {
   const { user } = useAuthStore();
   const { toasts, addToast, removeToast } = useToast();
@@ -855,26 +855,10 @@ const Class = () => {
 
               {selectedLesson.file_url ? (
                 <div className="bg-black rounded-lg overflow-hidden shadow-2xl">
-                  <div className="relative w-full aspect-video bg-black">
-                    <video
-                      controls
-                      controlsList="nodownload"
-                      className="w-full h-full object-contain"
-                      autoPlay
-                      preload="metadata"
-                      onContextMenu={(e) => e.preventDefault()}
-                    >
-                      <source
-                        src={selectedLesson.file_url}
-                        type={`video/${selectedLesson.file_type || "mp4"}`}
-                      />
-                      <source src={selectedLesson.file_url} type="video/mp4" />
-                      <source src={selectedLesson.file_url} type="video/webm" />
-                      <p className="text-white p-4">
-                        Your browser does not support the video tag.
-                      </p>
-                    </video>
-                  </div>
+                  <OptimizedVideoPlayer
+                    src={selectedLesson.file_url}
+                    fileType={selectedLesson.file_type || "mp4"}
+                  />
                 </div>
               ) : (
                 <div className="bg-gray-800 rounded-lg p-12 text-center">
