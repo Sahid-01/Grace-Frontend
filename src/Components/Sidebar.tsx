@@ -56,20 +56,20 @@ const Sidebar = ({
       } border-r border-gray-200 z-30 overflow-hidden`}
     >
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-[#1164A3]/5 to-[#1A9641]/5">
+      <div className="p-4 border-b border-gray-100 bg-[#f77f00]/5">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <h2 className="text-base font-bold text-[#1164A3]">Navigation</h2>
+            <h2 className="text-base font-bold text-[#f77f00]">Navigation</h2>
           )}
           <button
             onClick={onToggleCollapse}
-            className={`p-2 rounded-lg hover:bg-white transition-all duration-200 border border-gray-200 hover:border-[#1164A3] ${
+            className={`p-2 rounded-lg hover:bg-white transition-all duration-200 border border-gray-200 hover:border-[#f77f00] ${
               isCollapsed ? "mx-auto" : ""
             }`}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <svg
-              className={`w-4 h-4 text-gray-600 hover:text-[#1164A3] transition-all duration-300 ${
+              className={`w-4 h-4 text-gray-600 hover:text-[#f77f00] transition-all duration-300 ${
                 isCollapsed ? "rotate-180" : ""
               }`}
               fill="none"
@@ -99,13 +99,13 @@ const Sidebar = ({
                   onClick={onItemClick}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? "bg-gradient-to-r from-[#1164A3] to-[#1A9641] text-white shadow-md"
-                      : "text-gray-700 hover:bg-gradient-to-r hover:from-[#1164A3]/10 hover:to-[#1A9641]/10"
+                      ? "bg-[#f77f00] text-white shadow-md"
+                      : "text-gray-700 hover:bg-[#f77f00]/10"
                   } ${isCollapsed ? "justify-center" : ""}`}
                 >
                   <span
                     className={`transition-all duration-200 ${
-                      isActive ? "text-white" : "text-[#1164A3]"
+                      isActive ? "text-white" : "text-[#f77f00]"
                     }`}
                   >
                     {item.icon}
@@ -135,9 +135,9 @@ const Sidebar = ({
       {/* Bottom Section */}
       {!isCollapsed && (
         <div className="absolute bottom-4 left-4 right-4">
-          <div className="bg-gradient-to-r from-[#1164A3]/10 to-[#1A9641]/10 rounded-lg p-3 border border-[#1164A3]/20">
-            <p className="text-xs text-[#1164A3] text-center font-semibold">
-              Grace International
+          <div className="bg-[#f77f00]/10 rounded-lg p-3 border border-[#f77f00]/20">
+            <p className="text-xs text-[#f77f00] text-center font-semibold">
+              ECAN
             </p>
             <p className="text-xs text-gray-500 text-center mt-0.5">
               Version 1.0.0

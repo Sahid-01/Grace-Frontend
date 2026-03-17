@@ -443,7 +443,7 @@ const Class = () => {
         <div className="text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
             <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-t-[#1a365d] border-r-[#2c5282] animate-spin"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-[#f77f00] border-r-[#ffa040] animate-spin"></div>
           </div>
           <p className="text-gray-700 font-semibold text-lg">
             Loading courses...
@@ -469,14 +469,14 @@ const Class = () => {
       <div className="p-4 sm:p-6 lg:p-8">
         <ToastContainer toasts={toasts} onRemove={removeToast} />
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
+        <div className="bg-[#f77f00] rounded-lg shadow-md p-6 mb-6 text-white">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
               <GraduationCap className="w-7 h-7" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold">My Courses</h1>
-              <p className="text-blue-100 mt-1">
+              <p className="text-orange-100 mt-1">
                 Continue your learning journey
               </p>
             </div>
@@ -503,7 +503,7 @@ const Class = () => {
                 className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-200"
               >
                 {/* Course Card Header */}
-                <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] p-6 text-white">
+                <div className="bg-[#f77f00] p-6 text-white">
                   <div className="flex items-start justify-between mb-3">
                     <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
                       <BookOpen className="w-6 h-6" />
@@ -521,7 +521,7 @@ const Class = () => {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-                  <p className="text-blue-100 text-sm line-clamp-2">
+                  <p className="text-orange-100 text-sm line-clamp-2">
                     {course.description}
                   </p>
                 </div>
@@ -595,9 +595,9 @@ const Class = () => {
                                       onClick={() =>
                                         handleLessonIntroClick(lesson)
                                       }
-                                      className="flex items-center gap-2 p-2 hover:bg-blue-50 rounded transition cursor-pointer group"
+                                      className="flex items-center gap-2 p-2 hover:bg-orange-50 rounded transition cursor-pointer group"
                                     >
-                                      <PlayCircle className="w-4 h-4 text-[#1a365d] flex-shrink-0" />
+                                      <PlayCircle className="w-4 h-4 text-[#f77f00] flex-shrink-0" />
                                       <div className="flex-1 min-w-0">
                                         <span className="text-sm text-gray-700 block truncate">
                                           {lesson.title}
@@ -609,7 +609,7 @@ const Class = () => {
                                                 className={`h-full transition-all ${
                                                   lessonProgress.is_completed
                                                     ? "bg-green-500"
-                                                    : "bg-blue-500"
+                                                    : "bg-[#f77f00]"
                                                 }`}
                                                 style={{
                                                   width: `${lessonProgress.is_completed ? 100 : 0}%`,
@@ -678,11 +678,11 @@ const Class = () => {
                         </div>
                         <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-[#1a365d] to-[#2c5282] transition-all duration-300"
+                            className="h-full bg-[#f77f00] transition-all duration-300"
                             style={{ width: `${courseProgress}%` }}
                           />
                         </div>
-                        <button className="w-full bg-[#1a365d] text-white py-2 rounded-lg hover:bg-[#2c5282] transition font-medium text-sm">
+                        <button className="w-full bg-[#f77f00] text-white py-2 rounded-lg hover:bg-[#ffa040] transition font-medium text-sm">
                           {courseProgress === 100
                             ? "Course Completed! 🎉"
                             : courseProgress > 0
@@ -724,10 +724,10 @@ const Class = () => {
           >
             <div className="w-full max-w-2xl bg-white rounded-lg shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] p-6 text-white flex items-center justify-between">
+              <div className="bg-[#f77f00] p-6 text-white flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold">{selectedLesson.title}</h2>
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-orange-100 text-sm mt-1">
                     Lesson {selectedLesson.order}
                   </p>
                 </div>
@@ -809,7 +809,7 @@ const Class = () => {
                 <div className="flex gap-3 pt-4 border-t border-gray-200">
                   <button
                     onClick={handleStartVideo}
-                    className="flex-1 flex items-center justify-center gap-2 bg-[#1a365d] text-white px-4 py-3 rounded-lg hover:bg-[#2c5282] transition font-semibold"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#f77f00] text-white px-4 py-3 rounded-lg hover:bg-[#ffa040] transition font-semibold"
                   >
                     <PlayCircle className="w-5 h-5" />
                     Start Video
@@ -868,7 +868,7 @@ const Class = () => {
                   </p>
                   <button
                     onClick={closeVideoModal}
-                    className="mt-4 px-6 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition"
+                    className="mt-4 px-6 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] transition"
                   >
                     Close
                   </button>
@@ -899,7 +899,7 @@ const Class = () => {
     <div className="p-4 sm:p-6 lg:p-8">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1a365d] to-[#2c5282] rounded-lg shadow-md p-6 mb-6 text-white">
+      <div className="bg-[#f77f00] rounded-lg shadow-md p-6 mb-6 text-white">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
@@ -909,7 +909,7 @@ const Class = () => {
               <h1 className="text-2xl sm:text-3xl font-bold">
                 Course Management
               </h1>
-              <p className="text-blue-100 mt-1">
+              <p className="text-orange-100 mt-1">
                 Manage courses, sections, and lessons
                 {user?.branch && ` - ${user.branch}`}
               </p>
@@ -929,7 +929,7 @@ const Class = () => {
               clearCourseError();
               setIsCourseModalOpen(true);
             }}
-            className="flex items-center gap-2 bg-white text-[#1a365d] px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-all font-semibold shadow-sm"
+            className="flex items-center gap-2 bg-white text-[#f77f00] px-4 py-2.5 rounded-lg hover:bg-orange-50 transition-all font-semibold shadow-sm"
           >
             <Plus className="w-5 h-5" />
             Add Course
@@ -970,7 +970,7 @@ const Class = () => {
                       <ChevronRight className="w-5 h-5 text-gray-700" />
                     )}
                   </button>
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#1a365d] to-[#2c5282] rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="w-10 h-10 bg-[#f77f00] rounded-lg flex items-center justify-center shadow-sm">
                     <BookOpen className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1">
@@ -983,7 +983,7 @@ const Class = () => {
                       </p>
                     )}
                     <div className="flex gap-3 mt-2">
-                      <span className="text-xs bg-blue-50 text-[#1a365d] px-2.5 py-1 rounded-full font-semibold">
+                      <span className="text-xs bg-orange-50 text-[#f77f00] px-2.5 py-1 rounded-full font-semibold">
                         {course.course_type}
                       </span>
                       {course.branch_name && (
@@ -1003,7 +1003,7 @@ const Class = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleAddSection(course.id)}
-                    className="flex items-center gap-1 px-3 py-2 bg-[#2c5282] text-white text-sm rounded-lg hover:bg-[#1a365d] transition-all shadow-sm font-semibold"
+                    className="flex items-center gap-1 px-3 py-2 bg-[#f77f00] text-white text-sm rounded-lg hover:bg-[#ffa040] transition-all shadow-sm font-semibold"
                   >
                     <Plus className="w-4 h-4" />
                     Section
@@ -1067,7 +1067,7 @@ const Class = () => {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleAddLesson(section.id)}
-                              className="flex items-center gap-1 px-2 py-1 bg-[#c41e3a] text-white text-xs rounded hover:bg-[#a01629] transition"
+                              className="flex items-center gap-1 px-2 py-1 bg-[#f77f00] text-white text-xs rounded hover:bg-[#ffa040] transition"
                             >
                               <Plus className="w-3 h-3" />
                               Lesson
@@ -1100,7 +1100,7 @@ const Class = () => {
                             getSectionLessons(section.id).map((lesson) => (
                               <div
                                 key={lesson.id}
-                                className="bg-white p-3 rounded border border-gray-200 hover:border-[#1a365d] transition"
+                                className="bg-white p-3 rounded border border-gray-200 hover:border-[#f77f00] transition"
                               >
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-start gap-2 flex-1">
@@ -1188,7 +1188,7 @@ const Class = () => {
                 clearCourseError();
                 setIsCourseModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a365d] text-white rounded-lg hover:bg-[#2c5282] transition-all shadow-sm font-semibold"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] transition-all shadow-sm font-semibold"
             >
               <Plus className="w-5 h-5" />
               Add First Course
@@ -1228,7 +1228,7 @@ const Class = () => {
                     })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
               </div>
 
@@ -1246,7 +1246,7 @@ const Class = () => {
                   }
                   required
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
               </div>
 
@@ -1264,7 +1264,7 @@ const Class = () => {
                       })
                     }
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                   >
                     <option value="IELTS">IELTS</option>
                     <option value="PTE">PTE</option>
@@ -1283,7 +1283,7 @@ const Class = () => {
                         is_active: e.target.value === "active",
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -1307,7 +1307,7 @@ const Class = () => {
                       })
                     }
                     required={isSuperadmin}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                   >
                     <option value="">Select Branch</option>
                     {branches.map((branch) => (
@@ -1349,7 +1349,7 @@ const Class = () => {
                 <button
                   type="submit"
                   disabled={coursesLoading}
-                  className="flex-1 bg-[#1a365d] text-white px-4 py-2 rounded-lg hover:bg-[#2c5282] transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#f77f00] text-white px-4 py-2 rounded-lg hover:bg-[#ffa040] transition font-medium disabled:opacity-50"
                 >
                   {coursesLoading
                     ? isEditMode
@@ -1410,7 +1410,7 @@ const Class = () => {
                     })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 >
                   <option value="listening">Listening</option>
                   <option value="reading">Reading</option>
@@ -1431,7 +1431,7 @@ const Class = () => {
                       is_active: e.target.value === "active",
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -1448,7 +1448,7 @@ const Class = () => {
                 <button
                   type="submit"
                   disabled={sectionsLoading}
-                  className="flex-1 bg-[#2c5282] text-white px-4 py-2 rounded-lg hover:bg-[#1a365d] transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#f77f00] text-white px-4 py-2 rounded-lg hover:bg-[#ffa040] transition font-medium disabled:opacity-50"
                 >
                   {sectionsLoading
                     ? isEditMode
@@ -1510,7 +1510,7 @@ const Class = () => {
                     })
                   }
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
               </div>
 
@@ -1528,7 +1528,7 @@ const Class = () => {
                   }
                   required
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
               </div>
 
@@ -1548,7 +1548,7 @@ const Class = () => {
                     }
                     required
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                   />
                 </div>
 
@@ -1564,7 +1564,7 @@ const Class = () => {
                         is_active: e.target.value === "active",
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -1585,7 +1585,7 @@ const Class = () => {
                       file: e.target.files?.[0] || null,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Accepted formats: MP4, AVI, MOV, WMV, FLV, MKV, WebM
@@ -1606,7 +1606,7 @@ const Class = () => {
                     })
                   }
                   placeholder="https://example.com/video"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Direct link to video (YouTube, Vimeo, etc.)
@@ -1627,7 +1627,7 @@ const Class = () => {
                     })
                   }
                   placeholder="https://example.com/materials.pdf"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:border-[#1a365d]"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:border-[#f77f00]"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Link to PDF materials or study guide
@@ -1644,7 +1644,7 @@ const Class = () => {
                 <button
                   type="submit"
                   disabled={lessonsLoading}
-                  className="flex-1 bg-[#c41e3a] text-white px-4 py-2 rounded-lg hover:bg-[#a01629] transition font-medium disabled:opacity-50"
+                  className="flex-1 bg-[#f77f00] text-white px-4 py-2 rounded-lg hover:bg-[#ffa040] transition font-medium disabled:opacity-50"
                 >
                   {lessonsLoading
                     ? isEditMode

@@ -277,7 +277,7 @@ const MyProfile = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#1a365d] flex items-center gap-2">
+            <h1 className="text-3xl font-bold text-[#f77f00] flex items-center gap-2">
               <User className="w-8 h-8" />
               My Profile
             </h1>
@@ -297,7 +297,7 @@ const MyProfile = () => {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                  className="px-4 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] flex items-center gap-2"
                 >
                   <Save className="w-4 h-4" />
                   Save Changes
@@ -307,14 +307,14 @@ const MyProfile = () => {
               <>
                 <button
                   onClick={() => setShowChangePassword(true)}
-                  className="px-4 py-2 border border-[#1a365d] text-[#1a365d] rounded-lg hover:bg-[#1a365d] hover:text-white flex items-center gap-2"
+                  className="px-4 py-2 border border-[#f77f00] text-[#f77f00] rounded-lg hover:bg-[#f77f00] hover:text-white flex items-center gap-2"
                 >
                   <Lock className="w-4 h-4" />
                   Change Password
                 </button>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                  className="px-4 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] flex items-center gap-2"
                 >
                   <Edit className="w-4 h-4" />
                   Edit Profile
@@ -327,16 +327,16 @@ const MyProfile = () => {
         {/* Profile Card */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {/* Header Section */}
-          <div className="bg-gradient-to-r from-[#1164A3] to-[#1A9641] p-6 text-white">
+          <div className="bg-[#f77f00] p-6 text-white">
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-                <User className="w-10 h-10 text-[#1164A3]" />
+                <User className="w-10 h-10 text-[#f77f00]" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold">
                   {currentUser.first_name} {currentUser.last_name}
                 </h2>
-                <p className="text-blue-100">
+                <p className="text-orange-100">
                   {currentUser.role
                     ? currentUser.role.charAt(0).toUpperCase() +
                       currentUser.role.slice(1)
@@ -345,7 +345,7 @@ const MyProfile = () => {
                   {currentUser.employee_id && ` • ${currentUser.employee_id}`}
                 </p>
                 {currentUser.branch && (
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-orange-100 text-sm mt-1">
                     📍 {currentUser.branch}
                   </p>
                 )}
@@ -404,7 +404,7 @@ const MyProfile = () => {
                                 grade_level: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600 font-medium">
@@ -426,7 +426,7 @@ const MyProfile = () => {
                                 roll_number: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600 font-medium">
@@ -452,7 +452,7 @@ const MyProfile = () => {
                               admission_date: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -477,7 +477,7 @@ const MyProfile = () => {
                               previous_school: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -502,7 +502,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           placeholder="Enter any medical conditions or allergies"
                         />
                       ) : (
@@ -528,7 +528,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           placeholder="Enter your extracurricular activities and hobbies"
                         />
                       ) : (
@@ -561,7 +561,7 @@ const MyProfile = () => {
                                   father_name: e.target.value,
                                 })
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                             />
                           ) : (
                             <p className="text-sm text-gray-600 font-medium">
@@ -583,7 +583,7 @@ const MyProfile = () => {
                                   mother_name: e.target.value,
                                 })
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                             />
                           ) : (
                             <p className="text-sm text-gray-600 font-medium">
@@ -608,7 +608,7 @@ const MyProfile = () => {
                                 guardian_name: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                             placeholder="If different from parents"
                           />
                         ) : (
@@ -634,7 +634,7 @@ const MyProfile = () => {
                                   guardian_phone: e.target.value,
                                 })
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                             />
                           ) : (
                             <p className="text-sm text-gray-600 font-medium">
@@ -656,7 +656,7 @@ const MyProfile = () => {
                                   guardian_email: e.target.value,
                                 })
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                               placeholder="guardian@example.com"
                             />
                           ) : (
@@ -680,7 +680,7 @@ const MyProfile = () => {
                           {currentUser.enrolled_courses.map((course) => (
                             <span
                               key={course.id}
-                              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
+                              className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium"
                             >
                               {course.title}
                             </span>
@@ -716,7 +716,7 @@ const MyProfile = () => {
                           );
                         }
                       }}
-                      className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                      className="px-4 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] flex items-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
                       Create My Profile
@@ -751,7 +751,7 @@ const MyProfile = () => {
                               department: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -774,7 +774,7 @@ const MyProfile = () => {
                               subject_specialization: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -797,7 +797,7 @@ const MyProfile = () => {
                               qualification: e.target.value,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -820,7 +820,7 @@ const MyProfile = () => {
                               experience_years: parseInt(e.target.value) || 0,
                             })
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -843,7 +843,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           placeholder="Enter classes you are assigned to"
                         />
                       ) : (
@@ -867,7 +867,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           placeholder="Enter subjects you are teaching"
                         />
                       ) : (
@@ -891,7 +891,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           placeholder="Enter your certifications"
                         />
                       ) : (
@@ -915,7 +915,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           placeholder="Enter training programs you have completed"
                         />
                       ) : (
@@ -975,7 +975,7 @@ const MyProfile = () => {
                           );
                         }
                       }}
-                      className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                      className="px-4 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] flex items-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
                       Create My Profile
@@ -1010,7 +1010,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -1034,7 +1034,7 @@ const MyProfile = () => {
                                 phone_number: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600">
@@ -1057,7 +1057,7 @@ const MyProfile = () => {
                                 emergency_contact: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600">
@@ -1081,7 +1081,7 @@ const MyProfile = () => {
                             })
                           }
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                         />
                       ) : (
                         <p className="text-sm text-gray-600">
@@ -1105,7 +1105,7 @@ const MyProfile = () => {
                                 nationality: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600">
@@ -1128,7 +1128,7 @@ const MyProfile = () => {
                                 blood_group: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600">
@@ -1153,7 +1153,7 @@ const MyProfile = () => {
                                 facebook_url: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600">
@@ -1176,7 +1176,7 @@ const MyProfile = () => {
                                 linkedin_url: e.target.value,
                               })
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d]"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00]"
                           />
                         ) : (
                           <p className="text-sm text-gray-600">
@@ -1214,7 +1214,7 @@ const MyProfile = () => {
                           );
                         }
                       }}
-                      className="px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] flex items-center gap-2"
+                      className="px-4 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] flex items-center gap-2"
                     >
                       <Plus className="w-4 h-4" />
                       Create My Profile
@@ -1231,7 +1231,7 @@ const MyProfile = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold text-[#1a365d] flex items-center gap-2">
+                <h3 className="text-xl font-semibold text-[#f77f00] flex items-center gap-2">
                   <Lock className="w-5 h-5" />
                   Change Password
                 </h3>
@@ -1264,7 +1264,7 @@ const MyProfile = () => {
                         oldPassword: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:outline-none"
                     placeholder="Enter current password"
                   />
                 </div>
@@ -1282,7 +1282,7 @@ const MyProfile = () => {
                         newPassword: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:outline-none"
                     placeholder="Enter new password"
                   />
                 </div>
@@ -1300,7 +1300,7 @@ const MyProfile = () => {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1a365d] focus:outline-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#f77f00] focus:outline-none"
                     placeholder="Confirm new password"
                   />
                 </div>
@@ -1322,7 +1322,7 @@ const MyProfile = () => {
                   <button
                     onClick={handleChangePassword}
                     disabled={passwordLoading}
-                    className="flex-1 px-4 py-2 bg-[#1a365d] text-white rounded-lg hover:bg-[#2d4a7c] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2 bg-[#f77f00] text-white rounded-lg hover:bg-[#ffa040] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {passwordLoading ? "Changing..." : "Change Password"}
                   </button>

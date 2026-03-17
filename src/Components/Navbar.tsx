@@ -11,7 +11,7 @@ import {
   FileText,
   Users,
 } from "lucide-react";
-import logo from "@/assets/logo1.png";
+import logo from "@/assets/ECAN.png";
 // import logo1 from "@/assets/logo.png";
 
 const Navbar = () => {
@@ -104,13 +104,13 @@ const Navbar = () => {
   });
 
   return (
-    <nav className="bg-gradient-to-r from-[#1164A3] to-[#1A9641] shadow-lg border-b border-[#0d5189] sticky top-0 z-50">
+    <nav className="bg-[#f77f00] shadow-lg border-b border-[#e06e00] sticky top-0 z-50">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Hamburger Menu Button (Mobile Only) */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1164A3] transition-all duration-200"
+            className="lg:hidden p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#f77f00] transition-all duration-200"
           >
             {isMobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -134,10 +134,10 @@ const Navbar = () => {
               </div> */}
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-white">
-                  Grace International
+                  ECAN
                 </h1>
                 <p className="text-xs text-white/90 hidden sm:block">
-                  Learning Management System
+                  Learning Portal
                 </p>
               </div>
             </div>
@@ -147,7 +147,7 @@ const Navbar = () => {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center space-x-2 sm:space-x-3 text-white hover:text-white/90 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1164A3] rounded-lg px-2 sm:px-4 py-2 transition-all duration-200 hover:bg-white/10"
+              className="flex items-center space-x-2 sm:space-x-3 text-white hover:text-white/90 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#f77f00] rounded-lg px-2 sm:px-4 py-2 transition-all duration-200 hover:bg-white/10"
             >
               <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-white/30 to-white/20 rounded-full flex items-center justify-center shadow-md ring-2 ring-white/30">
                 <span className="text-white font-bold text-sm">
@@ -174,9 +174,9 @@ const Navbar = () => {
               <div className="absolute right-0 mt-3 w-72 bg-white rounded-lg shadow-xl ring-1 ring-gray-200 z-50 overflow-hidden">
                 <div className="py-2">
                   {/* User Info */}
-                  <div className="px-4 py-4 border-b border-gray-100 bg-gradient-to-r from-[#1164A3]/5 to-[#1A9641]/5">
+                  <div className="px-4 py-4 border-b border-gray-100 bg-[#f77f00]/5">
                     <div className="flex items-center space-x-3">
-                      <div className="w-14 h-14 bg-gradient-to-br from-[#1164A3] to-[#1A9641] rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
+                      <div className="w-14 h-14 bg-[#f77f00] rounded-full flex items-center justify-center shadow-md ring-2 ring-white">
                         <span className="text-white font-bold text-lg">
                           {getUserInitials()}
                         </span>
@@ -191,7 +191,7 @@ const Navbar = () => {
                           </p>
                         )}
                         {user?.role && (
-                          <span className="inline-block mt-1.5 px-2.5 py-0.5 text-xs font-semibold text-white bg-gradient-to-r from-[#1164A3] to-[#1A9641] rounded-full capitalize">
+                          <span className="inline-block mt-1.5 px-2.5 py-0.5 text-xs font-semibold text-white bg-[#f77f00] rounded-full capitalize">
                             {user.role}
                           </span>
                         )}
@@ -204,10 +204,10 @@ const Navbar = () => {
                     {/* Profile Link */}
                     <button
                       onClick={handleProfileClick}
-                      className="flex items-center w-full px-3 py-3 text-sm text-gray-700 hover:bg-[#1164A3]/5 transition-all duration-150 rounded-lg"
+                      className="flex items-center w-full px-3 py-3 text-sm text-gray-700 hover:bg-[#f77f00]/5 transition-all duration-150 rounded-lg"
                     >
-                      <div className="w-9 h-9 rounded-lg bg-[#1164A3]/10 flex items-center justify-center mr-3">
-                        <User className="w-4 h-4 text-[#1164A3]" />
+                      <div className="w-9 h-9 rounded-lg bg-[#f77f00]/10 flex items-center justify-center mr-3">
+                        <User className="w-4 h-4 text-[#f77f00]" />
                       </div>
                       <div className="flex-1 text-left">
                         <p className="font-semibold text-gray-900">Profile</p>
@@ -257,13 +257,13 @@ const Navbar = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? "bg-gradient-to-r from-[#1164A3] to-[#1A9641] text-white shadow-md"
-                          : "text-gray-700 hover:bg-gradient-to-r hover:from-[#1164A3]/10 hover:to-[#1A9641]/10"
+                          ? "bg-[#f77f00] text-white shadow-md"
+                          : "text-gray-700 hover:bg-[#f77f00]/10"
                       }`}
                     >
                       <span
                         className={`transition-all duration-200 ${
-                          isActive ? "text-white" : "text-[#1164A3]"
+                          isActive ? "text-white" : "text-[#f77f00]"
                         }`}
                       >
                         {item.icon}
